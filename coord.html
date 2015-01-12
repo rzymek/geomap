@@ -6,44 +6,60 @@
         <title>geomap</title>
     </head>
     <body>
-        <pre>
-        <script type="text/javascript">
-                function getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight) {
+        <pre><script type="text/javascript">
+            function getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight) {
 
-                    var standardizedRenderingPixelSize = 0.00028;
+                var standardizedRenderingPixelSize = 0.00028;
 
-                    var widthPixel = tileWidth * matrixWidth;
-                    var heightPixel = tileHeight * matrixHeight;
+                var widthPixel = tileWidth * matrixWidth;
+                var heightPixel = tileHeight * matrixHeight;
 
-                    var right = (scaleDenominator * widthPixel * standardizedRenderingPixelSize) + topLeftCorner.x;
-                    var bottom = topLeftCorner.y - (scaleDenominator * heightPixel * standardizedRenderingPixelSize);
+                var right = (scaleDenominator * widthPixel * standardizedRenderingPixelSize) + topLeftCorner.x;
+                var bottom = topLeftCorner.y - (scaleDenominator * heightPixel * standardizedRenderingPixelSize);
 
-                    var bounds = [topLeftCorner.x, bottom, right, topLeftCorner.y];
-                    var maxResolutionW = Math.round((right - topLeftCorner.x) / widthPixel);
-                    var maxResolutionH = Math.round((topLeftCorner.y - bottom) / heightPixel);
+                var bounds = [topLeftCorner.x, bottom, right, topLeftCorner.y];
+                var maxResolutionW = Math.round((right - topLeftCorner.x) / widthPixel);
+                var maxResolutionH = Math.round((topLeftCorner.y - bottom) / heightPixel);
 
-                    if (maxResolutionW !== maxResolutionH) {
-                        throw new Error('Could not calculate ');
-                    }
-
-                    return {
-                        bounds: bounds,
-                        maxResolution: maxResolutionW
-                    };
+                if (maxResolutionW !== maxResolutionH) {
+                    throw new Error('Could not calculate ');
                 }
 
+                return {
+                    bounds: bounds,
+                    maxResolution: maxResolutionW
+                };
+            }
+
+            function puwg() {
                 var scaleDenominator = 9449.404761904761;
                 var topLeftCorner = {
-                    x: 850000.0,
-                    y: 100000.0
+                    y: 850000.0,//X
+                    x: 100000.0//Y
                 };
                 var tileWidth = 512;
                 var matrixWidth = 598;
                 var tileHeight = 512;
                 var matrixHeight = 562;
-                var res = getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight);
-                document.write(JSON.stringify(res));
-        </script>
+                return getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight);
+            }
+
+            function wgs() {
+                var scaleDenominator = 9449.404761904761;
+                var topLeftCorner = {
+                    y: 56.0,
+                    x: 12.0
+                };
+                var tileWidth = 512;
+                var matrixWidth = 1104;
+                var tileHeight = 512;
+                var matrixHeight = 613;
+                return getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight);
+            }
+            var get = {x: 483217, y: 640194};
+            document.writeln(JSON.stringify(puwg()));
+            document.writeln(JSON.stringify(wgs()));
+                    </script>
         </pre>
     </body>
 </html>
