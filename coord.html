@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <style>
+        </style>
+        <title>geomap</title>
+    </head>
+    <body>
+        <pre>
+        <script type="text/javascript">
+                function getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight) {
+
+                    var standardizedRenderingPixelSize = 0.00028;
+
+                    var widthPixel = tileWidth * matrixWidth;
+                    var heightPixel = tileHeight * matrixHeight;
+
+                    var right = (scaleDenominator * widthPixel * standardizedRenderingPixelSize) + topLeftCorner.x;
+                    var bottom = topLeftCorner.y - (scaleDenominator * heightPixel * standardizedRenderingPixelSize);
+
+                    var bounds = [topLeftCorner.x, bottom, right, topLeftCorner.y];
+                    var maxResolutionW = Math.round((right - topLeftCorner.x) / widthPixel);
+                    var maxResolutionH = Math.round((topLeftCorner.y - bottom) / heightPixel);
+
+                    if (maxResolutionW !== maxResolutionH) {
+                        throw new Error('Could not calculate ');
+                    }
+
+                    return {
+                        bounds: bounds,
+                        maxResolution: maxResolutionW
+                    };
+                }
+
+                var scaleDenominator = 9449.404761904761;
+                var topLeftCorner = {
+                    x: 850000.0,
+                    y: 100000.0
+                };
+                var tileWidth = 512;
+                var matrixWidth = 598;
+                var tileHeight = 512;
+                var matrixHeight = 562;
+                var res = getBoundsAndMaxResForWMTS(scaleDenominator, topLeftCorner, tileWidth, matrixWidth, tileHeight, matrixHeight);
+                document.write(JSON.stringify(res));
+        </script>
+        </pre>
+    </body>
+</html>
