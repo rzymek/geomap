@@ -143,22 +143,28 @@
             });
             map.addInteraction(dragBox);
             dragBox.on('boxend', function (e) {
-                var box = dragBox.getGeometry().getExtent();
-                var x1 = box[0];
-                var y1 = box[1];
-                var x2 = box[2];
-                var y2 = box[3];
+                var extent = dragBox.getGeometry().getExtent();
+                var x1 = extent[0];
+                var y1 = extent[1];
+                var x2 = extent[2];
+                var y2 = extent[3];
                 source.clear();
-                source.addFeature(new ol.Feature(new ol.geom.Polygon([
+                var box = new ol.Feature(new ol.geom.Polygon([
                     [
                         [x1, y1],
                         [x1, y2],
                         [x2, y2],
                         [x2, y1]
                     ]
-                ])));
+                ]));
+                source.addFeature(box);
             });
-
+            map.on('click', function (evt) {
+                var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                    return feature;
+                });
+                console.log(feature);
+            });
         </script>
     </body>
 </html>
