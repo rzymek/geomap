@@ -5,13 +5,7 @@
     </head>
     <body>
         <script type="text/javascript">
-            var extent = JSON.parse(window.name);
-            var box = {
-                x1: extent[0],
-                y1: extent[1],
-                x2: extent[2],
-                y2: extent[3]
-            };
+            var box = JSON.parse(window.name);
             var url = 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&TILEMATRIXSET=EPSG:2180&'
                     + 'TILEMATRIX=EPSG:2180:{{z}}&'
                     + 'TILEROW={{x}}&'

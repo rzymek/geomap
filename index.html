@@ -163,7 +163,15 @@
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                     return feature;
                 });
-                window.open('fetch.html', JSON.stringify(feature.getGeometry().getExtent()));
+                var bbox = feature.getGeometry().getExtent();
+                var puwg = ol.proj.transform(bbox, 'EPSG:3857', 'EPSG:2180');
+                var box = {
+                    x1: puwg[0],
+                    y1: puwg[1],
+                    x2: puwg[2],
+                    y2: puwg[3]
+                };
+                window.open('fetch.html', JSON.stringify(box));
             });
         </script>
     </body>
