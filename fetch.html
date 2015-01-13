@@ -2,6 +2,8 @@
 <html lang="en">
     <head>
         <title>Fetch</title>
+        <script src="FileSaver.min.js" type="text/javascript"></script>
+
         <script type="text/javascript">
             function fetch() {
                 var box = JSON.parse(window.name);
@@ -75,34 +77,59 @@
                             .replace('{{y}}', Math.floor(tile.y));
                 }
 
+                function finished() {
+                    var content = [1, 2, 3, 4, 5].join('\n');
+                    var blob = new Blob([content], {type: "application/octet-stream"});
+                    saveAs(blob, "map.tfw");
+                }
+
                 var tiles = [];
                 for (var x = tileBounds.x1; x <= tileBounds.x2; x++) {
                     for (var y = tileBounds.y1; y <= tileBounds.y2; y++) {
                         tiles.push({x: x, y: y});
                     }
                 }
-                console.log(tiles);
-                canvas = document.getElementById('canvas');
+                var total = tiles.length;
+                var canvas = document.getElementById('canvas');
+                var status = document.getElementById('status');
+                status.innerHTML = (total - tiles.length) + '/' + total;
                 canvas.height = (tileBounds.x2 - tileBounds.x1) * tileWidth;
                 canvas.width = (tileBounds.y2 - tileBounds.y1) * tileHeight;
                 var ctx = canvas.getContext('2d');
                 var img = document.getElementById('fetcher'); //document.createElement('img');
                 img.onload = function () {
                     var tile = tiles.shift();
-                    console.log('fetched', tile);
                     var y = tile.x - tileBounds.x1;
                     var x = tile.y - tileBounds.y1;
-                    ctx.drawImage(img, x * tileWidth, y*tileHeight);
+                    ctx.drawImage(img, x * tileWidth, y * tileHeight);
                     if (tiles.length > 0) {
                         img.src = interpolate(tiles[0]);
+                    } else {
+                        finished();
                     }
+                    status.innerHTML = (total - tiles.length) + '/' + total;
                 };
                 img.src = interpolate(tiles[0]);
             }
         </script>
+        <style>
+            #fetcher {
+                border:solid 1px blue;
+            }
+            canvas{
+                border:solid 1px red;
+                transform: scale(0.5);
+                transform-origin: 0 0;
+            }
+            #status {
+                font-size: 120px;
+            }
+        </style>
     </head>
-    <body onload="fetch()">
-        <img id="fetcher" width="128" height="128" style="border:solid 1px blue"><br>
-        <canvas id="canvas" width="1000" height="1000"  style="border:solid 1px red"></canvas>
+    <body onload="fetch()">        
+        <img id="fetcher" width="128" height="128" alt="..." src="">
+        <span id="status"></span>
+        <br>
+        <canvas id="canvas" width="1000" height="1000"></canvas>
     </body>
 </html>
