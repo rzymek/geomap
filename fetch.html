@@ -5,6 +5,7 @@
         <script src="FileSaver.min.js" type="text/javascript"></script>
 
         <script type="text/javascript">
+            var drawTileFrame=false;
             function fetch() {
                 var box = JSON.parse(window.name);
                 var url = 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&TILEMATRIXSET=EPSG:2180&'
@@ -42,11 +43,10 @@
                 var tileMatrixMaxX = tileMatrixMinX + tileSpanX * matrixWidth;
                 var tileMatrixMinY = tileMatrixMaxY - tileSpanY * matrixHeight;
 
-                var epsilon = 1e-6;
-                var tileMinCol = floor((bBoxMinX - tileMatrixMinX) / tileSpanX + epsilon);
-                var tileMaxCol = floor((bBoxMaxX - tileMatrixMinX) / tileSpanX - epsilon);
-                var tileMinRow = floor((tileMatrixMaxY - bBoxMaxY) / tileSpanY + epsilon);
-                var tileMaxRow = floor((tileMatrixMaxY - bBoxMinY) / tileSpanY - epsilon);
+                var tileMinCol = (bBoxMinX - tileMatrixMinX) / tileSpanX;
+                var tileMaxCol = (bBoxMaxX - tileMatrixMinX) / tileSpanX;
+                var tileMinRow = (tileMatrixMaxY - bBoxMaxY) / tileSpanY;
+                var tileMaxRow = (tileMatrixMaxY - bBoxMinY) / tileSpanY;
                 // to avoid requesting out-of-range tiles
                 if (tileMinCol < 0)
                     tileMinCol = 0;
@@ -63,11 +63,18 @@
                  tileMaxRow, tileMaxCol
                  ]));
                  */
-                var tileBounds = {
+                tileExact = {
                     x1: tileMinRow,
                     y1: tileMinCol,
                     x2: tileMaxRow,
                     y2: tileMaxCol
+                };
+                var epsilon = 1e-6;
+                var tileBounds = {
+                    x1: floor(tileExact.x1 + epsilon),
+                    y1: floor(tileExact.y1 + epsilon),
+                    x2: floor(tileExact.x2 - epsilon),
+                    y2: floor(tileExact.y2 - epsilon)
                 };
 
                 function interpolate(tile) {
@@ -76,23 +83,23 @@
                             .replace('{{x}}', Math.floor(tile.x))
                             .replace('{{y}}', Math.floor(tile.y));
                 }
-                
+
                 function finished() {
                     var tfw = [
-                        pixelSpan,  // poziomy rozmiar pixela w metrach
-                        0,          // odchylenie pionowe
-                        0,          // odchylenie poziome
+                        pixelSpan, // poziomy rozmiar pixela w metrach
+                        0, // odchylenie pionowe
+                        0, // odchylenie poziome
                         -pixelSpan, // pionowy rozmiar pixela w metrach
-                        box.x1,     // pozioma współrzędna lewego górnego rogu
-                        box.y1      // pionowa współrzędna lewego górnego rogu 
+                        box.x1, // pozioma współrzędna lewego górnego rogu
+                        box.y2      // pionowa współrzędna lewego górnego rogu 
                     ].join('\n');
                     var blob = new Blob([tfw], {type: "application/octet-stream"});
                     saveAs(blob, "map.tfw");
                 }
 
                 var tiles = [];
-                for (var x = tileBounds.x1; x <= tileBounds.x2; x++) {
-                    for (var y = tileBounds.y1; y <= tileBounds.y2; y++) {
+                for (var x = tileBounds.x1; x <= tileBounds.x2 + 1; x++) {
+                    for (var y = tileBounds.y1; y <= tileBounds.y2 + 1; y++) {
                         tiles.push({x: x, y: y});
                     }
                 }
@@ -100,15 +107,28 @@
                 var status = document.getElementById('status');
                 var canvas = document.getElementById('canvas');
                 status.innerHTML = (total - tiles.length) + '/' + total;
-                canvas.height = (tileBounds.x2 - tileBounds.x1 + 1) * tileWidth;
-                canvas.width = (tileBounds.y2 - tileBounds.y1 + 1) * tileHeight;
+                canvas.height = (tileExact.x2 - tileExact.x1) * tileWidth;
+                canvas.width = (tileExact.y2 - tileExact.y1) * tileHeight;
+                offset = {
+                    y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileHeight,
+                    x: (tileExact.y1 - Math.floor(tileExact.y1)) * tileWidth
+                };
                 var ctx = canvas.getContext('2d');
                 var img = document.getElementById('fetcher'); //document.createElement('img');
                 img.onload = function () {
                     var tile = tiles.shift();
-                    var y = tile.x - tileBounds.x1;
                     var x = tile.y - tileBounds.y1;
-                    ctx.drawImage(img, x * tileWidth, y * tileHeight);
+                    var y = tile.x - tileBounds.x1;
+                    ctx.drawImage(img,
+                            -offset.x + x * tileWidth,
+                            -offset.y + y * tileHeight);
+                    if(drawTileFrame) {
+                        ctx.rect(
+                                -offset.x + x * tileWidth,
+                                -offset.y + y * tileHeight, tileWidth, tileHeight);
+                        ctx.stroke();
+                    }
+
                     if (tiles.length > 0) {
                         img.src = interpolate(tiles[0]);
                         status.innerHTML = (total - tiles.length) + '/' + total;
@@ -139,6 +159,6 @@
         <img id="fetcher" width="64" height="64" alt="..." src="">
         <span id="status"></span>
         <br>
-        <canvas id="canvas" width="1000" height="1000"></canvas>
+        <canvas id="canvas" width="100" height="100"></canvas>
     </body>
 </html>
