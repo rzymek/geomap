@@ -60,6 +60,7 @@
             document.writeln(JSON.stringify(wgs()));
 
             var coord = {x: 483217, y: 640194};
+
             var b = puwg().bounds;
             bounds = {
                 left: b[0],
@@ -106,11 +107,72 @@
                 for (var y = 0; y < n; y++) {
 //                    var url1 = url.replace('{{z}}', Math.floor(tile.z)).replace('{{y}}', Math.floor(tile.x) + x).replace('{{x}}', Math.floor(tile.y) + y);
                     var url1 = url.replace('{{z}}', Math.floor(tile.z)).replace('{{x}}', Math.floor(tile.x) + x).replace('{{y}}', Math.floor(tile.y) + y);
-                    document.write('<a href="' + url1 + '"><img src="' + url1 + '"></a>');
+//                    document.write('<a href="' + url1 + '"><img src="' + url1 + '"></a>');
                 }
                 document.writeln('');
             }
+// http://www.opengeospatial.org/standards/wmts
+//  http://portal.opengeospatial.org/files/?artifact_id=35326
+
+            function floor(x) {
+                return Math.floor(x);
+            }
+
+            var bBoxMinX = coord.y;
+            var bBoxMaxX = coord.y;
+            var bBoxMaxY = coord.x;
+            var bBoxMinY = coord.x;
+
+            var scaleDenominator = 9449.404761904761;
+            var topLeftCorner = {
+                y: 850000.0, //X
+                x: 100000.0//Y
+            };
+            var tileWidth = 512;
+            var matrixWidth = 598;
+            var tileHeight = 512;
+            var matrixHeight = 562;
+
+            var metersPerUnit = 1;
+            var pixelSpan = scaleDenominator * 0.28e-3 / metersPerUnit;
+
+            var tileSpanX = tileWidth * pixelSpan;
+            var tileSpanY = tileHeight * pixelSpan;
+
+            var tileMatrixMinX = 100000;
+            var tileMatrixMaxY = 850000;
+            var tileMatrixMaxX = tileMatrixMinX + tileSpanX * matrixWidth;
+            var tileMatrixMinY = tileMatrixMaxY - tileSpanY * matrixHeight;
+
+            var epsilon = 1e-6;
+            var tileMinCol = floor((bBoxMinX - tileMatrixMinX) / tileSpanX + epsilon);
+            var tileMaxCol = floor((bBoxMaxX - tileMatrixMinX) / tileSpanX - epsilon);
+            var tileMinRow = floor((tileMatrixMaxY - bBoxMaxY) / tileSpanY + epsilon);
+            var tileMaxRow = floor((tileMatrixMaxY - bBoxMinY) / tileSpanY - epsilon);
+            // to avoid requesting out-of-range tiles
+            if (tileMinCol < 0)
+                tileMinCol = 0;
+            if (tileMaxCol >= matrixWidth)
+                tileMaxCol = matrixWidth - 1;
+            if (tileMinRow < 0)
+                tileMinRow = 0;
+            if (tileMaxRow >= matrixHeight)
+                tileMaxRow = matrixHeight - 1;
+
+            document.writeln(JSON.stringify([
+                tileMinRow, tileMinCol,
+                tileMaxRow, tileMaxCol
+            ]));
+            var url1 = url
+                    .replace('{{z}}', Math.floor(tile.z))
+                    .replace('{{x}}', Math.floor(tileMinRow))
+                    .replace('{{y}}', Math.floor(tileMinCol));
+            document.write('<a href="' + url1 + '"><img src="' + url1 + '"></a>');
+
+//http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:9&
+// TILEROW=270&TILECOL=398
                     </script>
+Expected: 270 398
         </pre>
     </body>
 </html>
