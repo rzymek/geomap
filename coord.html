@@ -83,8 +83,8 @@
 //                x: limits.MinTileRow +((coord.x - bounds.left) / (bounds.right - bounds.left)) * (limits.MaxTileRow - limits.MinTileRow),
 //                y: limits.MinTileCol + ((coord.y - bounds.bottom) / (bounds.top - bounds.bottom)) * (limits.MaxTileCol - limits.MinTileCol),
 
-                x: ((coord.x - bounds.left) / (bounds.right - bounds.left)) * (limits.MaxTileCol + 1 - limits.MinTileCol),
-                y: ((coord.y - bounds.bottom) / (bounds.top - bounds.bottom)) * (limits.MaxTileRow + 1 - limits.MinTileRow),
+                x: ((coord.x - bounds.left) / (bounds.right - bounds.left)) * (limits.MaxTileCol - limits.MinTileCol),
+                y: ((coord.y - bounds.bottom) / (bounds.top - bounds.bottom)) * (limits.MaxTileRow - limits.MinTileRow),
 //                x: ((coord.x - bounds.left) / (bounds.right - bounds.left)) * (limits.MaxTileRow) - limits.MinTileRow,
 //                y: ((coord.y - bounds.bottom) / (bounds.top - bounds.bottom)) * (limits.MaxTileCol) - limits.MinTileCol,
 //                
