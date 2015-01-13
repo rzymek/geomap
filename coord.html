@@ -100,12 +100,12 @@
             document.writeln(JSON.stringify(bounds));
             document.writeln(JSON.stringify(tile));
             document.writeln((coord.x - bounds.left) / (bounds.right - bounds.left));
-            document.writeln((coord.y - bounds.top) / (bounds.top - bounds.bottom));
-            var n = 4;
+            document.writeln((coord.y - bounds.bottom) / (bounds.top - bounds.bottom));
+            var n = 3;
             for (var x = 0; x < n; x++) {
                 for (var y = 0; y < n; y++) {
 //                    var url1 = url.replace('{{z}}', Math.floor(tile.z)).replace('{{y}}', Math.floor(tile.x) + x).replace('{{x}}', Math.floor(tile.y) + y);
-                    var url1 = url.replace('{{z}}', Math.floor(tile.z)).replace('{{x}}', Math.ceil(tile.x) + x).replace('{{y}}', Math.ceil(tile.y) + y);
+                    var url1 = url.replace('{{z}}', Math.floor(tile.z)).replace('{{x}}', Math.floor(tile.x) + x).replace('{{y}}', Math.floor(tile.y) + y);
                     document.write('<a href="' + url1 + '"><img src="' + url1 + '"></a>');
                 }
                 document.writeln('');
