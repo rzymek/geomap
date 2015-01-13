@@ -163,7 +163,7 @@
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                     return feature;
                 });
-                console.log(feature);
+                window.open('fetch.html', JSON.stringify(feature.getGeometry().getExtent()));
             });
         </script>
     </body>
