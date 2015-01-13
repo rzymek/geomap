@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">        
+        <style>
+            .map {
+                position:absolute;
+                top:0;
+                left:0;
+                right:0;
+                bottom:0;
+                z-index: 0;
+            }
+            .coords {
+                padding: 3px;
+                position: absolute;
+                top:30px;
+                right: 8px;
+                z-index: 1;
+                background-color: white;
+            }
+        </style>
+        <script src="http://openlayers.org/en/v3.0.0/build/ol-debug.js" type="text/javascript"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/proj4js/2.3.3/proj4-src.js"></script>
+        <title>geomap</title>
+    </head>
+    <body>
+        <div id="map" class="map"></div>        
+        <div class="coords">
+            <div id="latlon"></div>
+            <div id="mercator"></div>
+            <div id="puwg"></div>
+        </div>
+        <script type="text/javascript">
+            var puwg92 = "EPSG:2180";
+            proj4.defs(puwg92, "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
+            //https://gist.github.com/probins/6008221
+            var llMouse = new ol.control.MousePosition({
+                coordinateFormat: function (coordinate) {
+                    return ol.coordinate.toStringXY(coordinate, 4); // 4 decimal places
+                },
+                className: '',
+                projection: 'EPSG:4326', // by default, uses view projection
+                target: document.getElementById('latlon')
+            });
+            // 2nd mouse position in view projection x,y coords
+            var mercator = new ol.control.MousePosition({
+                coordinateFormat: function (coordinate) {
+                    return ol.coordinate.toStringXY(coordinate, 0);
+                },
+                className: '',
+                target: document.getElementById('mercator')
+            });
+            
+            var map = new ol.Map({
+                target: 'map',
+                controls: ol.control.defaults().extend(
+                        [
+                            new ol.control.MousePosition({
+                                coordinateFormat: function (coordinate) {
+                                    return ol.coordinate.toStringXY(coordinate, 4); // 4 decimal places
+                                },
+                                className: '',
+                                projection: 'EPSG:4326', // by default, uses view projection
+                                target: document.getElementById('latlon')
+                            }),
+                            new ol.control.MousePosition({
+                                coordinateFormat: function (coordinate) {
+                                    return ol.coordinate.toStringXY(coordinate, 0); // 4 decimal places
+                                },
+                                className: '',
+                                projection: puwg92, // by default, uses view projection
+                                target: document.getElementById('puwg')
+                            }),
+                            new ol.control.MousePosition({
+                                coordinateFormat: function (coordinate) {
+                                    return ol.coordinate.toStringXY(coordinate, 0);
+                                },
+                                className: '',
+                                target: document.getElementById('mercator')
+                            }),
+                            new ol.control.ScaleLine()
+                        ]),
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM(),
+                        opacity: 0.5
+                    })/*,
+                    new ol.layer.Tile({
+                        opacity: 0.7,
+                        source: new ol.source.WMTS({
+                            //?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&"
+						//+ "TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${z}&"
+						//+ "TILEROW=${y}&TILECOL=${x}
+                            url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO',                            
+                            matrixSet: puwg92,
+                            format: 'image/jpeg',
+                            tileGrid: new ol.tilegrid.WMTS({
+                                origin: [850000.0,100000.0],
+                                resolutions: [12,11,10,9,8,7,6,5,4,3,2,1,0],
+                                tileSize: 512,
+                                matrixIds: [0,1,2,3,4,5,6,7,8,9,10,11,12]
+                            }),
+                            style: 'default'
+                        })
+                    }),
+                    new ol.layer.Tile({
+                        opacity: 0.7,
+                        source: new ol.source.TileDebug({
+                            projection: 'EPSG:3857',
+                            tileGrid: new ol.tilegrid.XYZ({
+                                maxZoom: 22
+                            })
+                        })
+                    })*/
+                ],
+                view: new ol.View({
+                    center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
+                    zoom: 10
+                })
+            });
+        </script>
+    </body>
+</html>
