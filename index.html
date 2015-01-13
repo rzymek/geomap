@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <meta charset="utf-8"> 
         <link rel="stylesheet" href="http://openlayers.org/en/v3.0.0/css/ol.css" type="text/css">        
         <style>
             .map {
@@ -163,7 +164,7 @@
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                     return feature;
                 });
-                if(!feature) {
+                if (!feature) {
                     return;
                 }
                 var bbox = feature.getGeometry().getExtent();
