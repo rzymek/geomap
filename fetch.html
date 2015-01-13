@@ -76,10 +76,17 @@
                             .replace('{{x}}', Math.floor(tile.x))
                             .replace('{{y}}', Math.floor(tile.y));
                 }
-
+                
                 function finished() {
-                    var content = [1, 2, 3, 4, 5].join('\n');
-                    var blob = new Blob([content], {type: "application/octet-stream"});
+                    var tfw = [
+                        pixelSpan,  // poziomy rozmiar pixela w metrach
+                        0,          // odchylenie pionowe
+                        0,          // odchylenie poziome
+                        -pixelSpan, // pionowy rozmiar pixela w metrach
+                        box.x1,     // pozioma współrzędna lewego górnego rogu
+                        box.y1      // pionowa współrzędna lewego górnego rogu 
+                    ].join('\n');
+                    var blob = new Blob([tfw], {type: "application/octet-stream"});
                     saveAs(blob, "map.tfw");
                 }
 
@@ -90,11 +97,11 @@
                     }
                 }
                 var total = tiles.length;
-                var canvas = document.getElementById('canvas');
                 var status = document.getElementById('status');
+                var canvas = document.getElementById('canvas');
                 status.innerHTML = (total - tiles.length) + '/' + total;
-                canvas.height = (tileBounds.x2 - tileBounds.x1) * tileWidth;
-                canvas.width = (tileBounds.y2 - tileBounds.y1) * tileHeight;
+                canvas.height = (tileBounds.x2 - tileBounds.x1 + 1) * tileWidth;
+                canvas.width = (tileBounds.y2 - tileBounds.y1 + 1) * tileHeight;
                 var ctx = canvas.getContext('2d');
                 var img = document.getElementById('fetcher'); //document.createElement('img');
                 img.onload = function () {
@@ -104,10 +111,12 @@
                     ctx.drawImage(img, x * tileWidth, y * tileHeight);
                     if (tiles.length > 0) {
                         img.src = interpolate(tiles[0]);
+                        status.innerHTML = (total - tiles.length) + '/' + total;
                     } else {
+                        status.innerHTML = 'Zapisz lub skopiuj poniższy obraz';
                         finished();
+                        img.remove();
                     }
-                    status.innerHTML = (total - tiles.length) + '/' + total;
                 };
                 img.src = interpolate(tiles[0]);
             }
@@ -122,12 +131,12 @@
                 transform-origin: 0 0;
             }
             #status {
-                font-size: 120px;
+                font-size: 64px;
             }
         </style>
     </head>
     <body onload="fetch()">        
-        <img id="fetcher" width="128" height="128" alt="..." src="">
+        <img id="fetcher" width="64" height="64" alt="..." src="">
         <span id="status"></span>
         <br>
         <canvas id="canvas" width="1000" height="1000"></canvas>
