@@ -163,6 +163,9 @@
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                     return feature;
                 });
+                if(!feature) {
+                    return;
+                }
                 var bbox = feature.getGeometry().getExtent();
                 var puwg = ol.proj.transform(bbox, 'EPSG:3857', 'EPSG:2180');
                 var box = {
