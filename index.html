@@ -51,7 +51,19 @@
                 className: '',
                 target: document.getElementById('mercator')
             });
-            
+            var source = new ol.source.Vector();
+            var vector = new ol.layer.Vector({
+                source: source,
+                style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 0, 0, 0.2)'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: 'red',
+                        width: 2
+                    })
+                })
+            });
             var map = new ol.Map({
                 target: 'map',
                 controls: ol.control.defaults().extend(
@@ -85,40 +97,68 @@
                     new ol.layer.Tile({
                         source: new ol.source.OSM(),
                         opacity: 0.5
-                    })/*,
-                    new ol.layer.Tile({
-                        opacity: 0.7,
-                        source: new ol.source.WMTS({
-                            //?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&"
-						//+ "TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${z}&"
-						//+ "TILEROW=${y}&TILECOL=${x}
-                            url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO',                            
-                            matrixSet: puwg92,
-                            format: 'image/jpeg',
-                            tileGrid: new ol.tilegrid.WMTS({
-                                origin: [850000.0,100000.0],
-                                resolutions: [12,11,10,9,8,7,6,5,4,3,2,1,0],
-                                tileSize: 512,
-                                matrixIds: [0,1,2,3,4,5,6,7,8,9,10,11,12]
-                            }),
-                            style: 'default'
-                        })
                     }),
-                    new ol.layer.Tile({
-                        opacity: 0.7,
-                        source: new ol.source.TileDebug({
-                            projection: 'EPSG:3857',
-                            tileGrid: new ol.tilegrid.XYZ({
-                                maxZoom: 22
-                            })
-                        })
-                    })*/
+                    vector /*,
+                     new ol.layer.Tile({
+                     opacity: 0.7,
+                     source: new ol.source.WMTS({
+                     //?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&"
+                     //+ "TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${z}&"
+                     //+ "TILEROW=${y}&TILECOL=${x}
+                     url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO',                            
+                     matrixSet: puwg92,
+                     format: 'image/jpeg',
+                     tileGrid: new ol.tilegrid.WMTS({
+                     origin: [850000.0,100000.0],
+                     resolutions: [12,11,10,9,8,7,6,5,4,3,2,1,0],
+                     tileSize: 512,
+                     matrixIds: [0,1,2,3,4,5,6,7,8,9,10,11,12]
+                     }),
+                     style: 'default'
+                     })
+                     }),
+                     new ol.layer.Tile({
+                     opacity: 0.7,
+                     source: new ol.source.TileDebug({
+                     projection: 'EPSG:3857',
+                     tileGrid: new ol.tilegrid.XYZ({
+                     maxZoom: 22
+                     })
+                     })
+                     })*/
                 ],
                 view: new ol.View({
                     center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
                     zoom: 10
                 })
             });
+
+            var dragBox = new ol.interaction.DragBox({
+                condition: ol.events.condition.shiftKeyOnly,
+                style: new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: [0, 0, 255, 1]
+                    })
+                })
+            });
+            map.addInteraction(dragBox);
+            dragBox.on('boxend', function (e) {
+                var box = dragBox.getGeometry().getExtent();
+                var x1 = box[0];
+                var y1 = box[1];
+                var x2 = box[2];
+                var y2 = box[3];
+                source.clear();
+                source.addFeature(new ol.Feature(new ol.geom.Polygon([
+                    [
+                        [x1, y1],
+                        [x1, y2],
+                        [x2, y2],
+                        [x2, y1]
+                    ]
+                ])));
+            });
+
         </script>
     </body>
 </html>
