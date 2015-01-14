@@ -19,39 +19,40 @@
                 right: 8px;
                 z-index: 1;
                 background-color: white;
+                white-space: nowrap;
+            }
+            .coords * {
+                white-space: nowrap;
             }
         </style>
         <script src="lib/ol.js" type="text/javascript"></script>
-        <script src="lib/proj4.js"></script>
+        <script src="lib/proj4.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var exports = {};
+        </script>
+        <script src="lib/mgrs.js" type="text/javascript"></script>
         <title>geomap</title>
     </head>
     <body>
         <div id="map" class="map"></div>        
-        <div class="coords">
-            <div id="latlon"></div>
-            <div id="mercator"></div>
-            <div id="puwg"></div>
-        </div>
+        <table class="coords">
+            <tr>
+                <td>MGRS:</td><td id="mgrs"></td>
+            </tr>
+            <tr>
+                <td>LatLon:</td><td id="latlon"></td>
+            </tr>
+            <tr>
+                <td>Mercator:</td><td id="mercator"></td>
+            </tr>
+            <tr>
+                <td>PUWG:</td><td id="puwg"></td>
+            </tr>
+        </table>
         <script type="text/javascript">
             var puwg92 = "EPSG:2180";
             proj4.defs(puwg92, "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
-            //https://gist.github.com/probins/6008221
-            var llMouse = new ol.control.MousePosition({
-                coordinateFormat: function (coordinate) {
-                    return ol.coordinate.toStringXY(coordinate, 4); // 4 decimal places
-                },
-                className: '',
-                projection: 'EPSG:4326', // by default, uses view projection
-                target: document.getElementById('latlon')
-            });
-            // 2nd mouse position in view projection x,y coords
-            var mercator = new ol.control.MousePosition({
-                coordinateFormat: function (coordinate) {
-                    return ol.coordinate.toStringXY(coordinate, 0);
-                },
-                className: '',
-                target: document.getElementById('mercator')
-            });
+
             var source = new ol.source.Vector();
             var vector = new ol.layer.Vector({
                 source: source,
@@ -71,18 +72,27 @@
                         [
                             new ol.control.MousePosition({
                                 coordinateFormat: function (coordinate) {
-                                    return ol.coordinate.toStringXY(coordinate, 4); // 4 decimal places
+                                    return exports.forward(coordinate, 5)
+                                            .replace(/([0-9]*)([A-Z]*)([0-9]{5})([0-9]{5})/, "$1 $2 $3 $4");
                                 },
                                 className: '',
-                                projection: 'EPSG:4326', // by default, uses view projection
+                                projection: 'EPSG:4326',
+                                target: document.getElementById('mgrs')
+                            }),
+                            new ol.control.MousePosition({
+                                coordinateFormat: function (coordinate) {
+                                    return ol.coordinate.toStringXY(coordinate, 4);
+                                },
+                                className: '',
+                                projection: 'EPSG:4326',
                                 target: document.getElementById('latlon')
                             }),
                             new ol.control.MousePosition({
                                 coordinateFormat: function (coordinate) {
-                                    return ol.coordinate.toStringXY(coordinate, 0); // 4 decimal places
+                                    return ol.coordinate.toStringXY(coordinate, 0); // 0 decimal places
                                 },
                                 className: '',
-                                projection: puwg92, // by default, uses view projection
+                                projection: puwg92,
                                 target: document.getElementById('puwg')
                             }),
                             new ol.control.MousePosition({
@@ -178,5 +188,5 @@
                 window.open('fetch.html', JSON.stringify(box));
             });
         </script>
-    </body>
+</body>
 </html>
