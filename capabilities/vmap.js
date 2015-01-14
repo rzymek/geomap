@@ -656,5 +656,6 @@ var vmap = {
     }
    }
   ]
- }
-}
+ },
+ "url": "http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/VMAP"
+};

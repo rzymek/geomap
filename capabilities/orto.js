@@ -681,5 +681,6 @@ var orto = {
     }
    }
   ]
- }
-}
+ },
+ "url": "http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/ORTO"
+};

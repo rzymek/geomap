@@ -63,6 +63,7 @@ function processXML(xml, callback) {
         callback(processCapabilites(result));
     });
 }
+var host = 'mapy.geoportal.gov.pl';
 var services = {
     topo: '/wss/service/WMTS/guest/wmts/TOPO',
     orto: '/wss/service/WMTS/guest/wmts/ORTO',
@@ -70,8 +71,7 @@ var services = {
 };
 function fetch(type, callback) {
     http.get({
-        host: 'mapy.geoportal.gov.pl',
-        port: 80,
+        host: host,
         path: services[type]
                 + '?SERVICE=WMTS&REQUEST=GetCapabilities&VERSION=1.3.0'
     }, function (res) {
@@ -88,7 +88,7 @@ function fetch(type, callback) {
 }
 
 function read() {
-    fs.readFile('../docs/GetCapabilities.xml', 'utf8', function (err, data) {
+    fs.readFile('docs/GetCapabilities.xml', 'utf8', function (err, data) {
         if (err) {
             return console.log(err);
         }
@@ -98,9 +98,10 @@ function read() {
 
 Object.keys(services).forEach(function (type) {
     fetch(type, function (info) {
+        info.url = 'http://' + host + services[type];
         var js = 'var ' + type + ' = '
-                + JSON.stringify(info, null, ' ');
-        fs.writeFile('../capabilities/'+type+'.js', js);
+                + JSON.stringify(info, null, ' ') + ';';
+        fs.writeFile('capabilities/' + type + '.js', js);
     });
 });
 

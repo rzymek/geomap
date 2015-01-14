@@ -96,6 +96,10 @@
                 <div id="selectionInfo"><b>Shift+lewy klawisz myszy</b> zaznacza obszar do pobrania.</div>
                 <div id="fetcher">
                     Warstwa:
+                    <select id="getSource">
+                        <option value="topo">Mapa topograficzna</option>
+                        <option value="orto">Ortofotomapa</option>
+                    </select>
                     <select id="getZ">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -159,22 +163,6 @@
                 'OpenCycleMap': new ol.source.XYZ({
                     url: 'http://tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
                 }),
-                /*
-                 'Geoportal: TODO': new ol.source.WMTS({
-                 url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?' +
-                 'SERVICE=WMTS&' +
-                 'REQUEST=GetTile&' +
-                 'VERSION=1.0.0',
-                 matrixSet: 'EPSG:2180',
-                 format: 'image/jpeg',
-                 layer: 'MAPA TOPOGRAFICZNA',
-                 style: 'default',
-                 projection: 'EPSG:2180',
-                 tileGrid: new ol.tilegrid.WMTS({
-                 origin: [100000, 850000],
-                 tileSize: 512
-                 })
-                 }),*/
                 'UMP': new ol.source.XYZ({
                     url: 'http://tiles.ump.waw.pl/ump_tiles/{z}/{x}/{y}.png'
                 })
@@ -215,14 +203,18 @@
                     })
                 })
             }));
+
+            function formatMGRS(c) {
+                return exports.forward(c, 5).replace(/([0-9]*)([A-Z]*)([0-9]{5})([0-9]{5})/, "$1 $2 $3 $4");
+            }
+
             var map = new ol.Map({
                 target: 'map',
                 controls: ol.control.defaults().extend(
                         [
                             new ol.control.MousePosition({
                                 coordinateFormat: function (coordinate) {
-                                    return exports.forward(coordinate, 5)
-                                            .replace(/([0-9]*)([A-Z]*)([0-9]{5})([0-9]{5})/, "$1 $2 $3 $4");
+                                    return formatMGRS(coordinate);
                                 },
                                 className: '',
                                 projection: 'EPSG:4326',
@@ -295,9 +287,11 @@
             function fetch() {
                 var bbox = selectedBox.getGeometry().getExtent();
                 var puwg = ol.proj.transform(bbox, 'EPSG:3857', 'EPSG:2180');
-
+                var mgrsTopLeft = exports.forward(ol.proj.transform([bbox[0], bbox[1]], 'EPSG:3857', 'EPSG:4326'), 1);
                 window.open('fetch.html', JSON.stringify({
                     z: document.getElementById('getZ').value,
+                    source: document.getElementById('getSource').value,
+                    title: mgrsTopLeft,
                     box: {
                         x1: puwg[0],
                         y1: puwg[1],
@@ -338,8 +332,7 @@
                 i[r] = i[r] || function () {
                     (i[r].q = i[r].q || []).push(arguments)
                 }, i[r].l = 1 * new Date();
-                a = s.createElement(o),
-                        m = s.getElementsByTagName(o)[0];
+                a = s.createElement(o), m = s.getElementsByTagName(o)[0];
                 a.async = 1;
                 a.src = g;
                 m.parentNode.insertBefore(a, m)

@@ -656,5 +656,6 @@ var topo = {
     }
    }
   ]
- }
-}
+ },
+ "url": "http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO"
+};
