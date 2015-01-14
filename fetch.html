@@ -7,7 +7,8 @@
         <script type="text/javascript">
             var drawTileFrame = false;
             function fetch() {
-                var box = JSON.parse(window.name);
+                var params = JSON.parse(window.name)
+                var box = params.box;
                 var url = 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&TILEMATRIXSET=EPSG:2180&'
                         + 'TILEMATRIX=EPSG:2180:{{z}}&'
                         + 'TILEROW={{x}}&'
@@ -16,21 +17,66 @@
                     return Math.floor(x);
                 }
 
-                var tileZ = 9;
+                var scaleDenominators = [
+                    7559523.809523809,
+                    3779761.9047619044,
+                    1889880.9523809522,
+                    944940.4761904761,
+                    472470.23809523805,
+                    236235.11904761902,
+                    94494.04761904762,
+                    47247.02380952381,
+                    23623.511904761905,
+                    9449.404761904761,
+                    4724.702380952381,
+                    1889.8809523809523,
+                    944.9404761904761
+                ];
+                var matrixWidths = [
+                    2,
+                    3,
+                    6,
+                    12,
+                    23,
+                    45,
+                    111,
+                    221,
+                    442,
+                    1104,
+                    2207,
+                    5517,
+                    11034
+                ];
+                var matrixHeights = [
+                    1,
+                    2,
+                    4,
+                    7,
+                    13,
+                    25,
+                    62,
+                    123,
+                    245,
+                    613,
+                    1225,
+                    3061,
+                    6121
+                ];
+                var tileZ = params.z;
                 var bBoxMinX = box.x1;
                 var bBoxMaxX = box.x2;
                 var bBoxMinY = box.y1;
                 var bBoxMaxY = box.y2;
 
-                var scaleDenominator = 9449.404761904761;
+                var scaleDenominator = scaleDenominators[tileZ];
                 var topLeftCorner = {
                     y: 850000.0, //X
                     x: 100000.0//Y
                 };
                 var tileWidth = 512;
-                var matrixWidth = 598;
                 var tileHeight = 512;
-                var matrixHeight = 562;
+                var matrixWidth = matrixWidths[tileZ];
+                var matrixHeight = matrixHeights[tileZ];
 
                 var metersPerUnit = 1;
                 var pixelSpan = scaleDenominator * 0.28e-3 / metersPerUnit;
@@ -38,8 +84,8 @@
                 var tileSpanX = tileWidth * pixelSpan;
                 var tileSpanY = tileHeight * pixelSpan;
 
-                var tileMatrixMinX = 100000;
-                var tileMatrixMaxY = 850000;
+                var tileMatrixMinX = topLeftCorner.x;
+                var tileMatrixMaxY = topLeftCorner.y;
                 var tileMatrixMaxX = tileMatrixMinX + tileSpanX * matrixWidth;
                 var tileMatrixMinY = tileMatrixMaxY - tileSpanY * matrixHeight;
 
