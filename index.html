@@ -25,10 +25,22 @@
                 right: 8px;
                 z-index: 1;
                 background-color: white;
-                white-space: nowrap;
+                opacity: 0.7;
             }
-            .coords * {
-                white-space: nowrap;
+            .help{
+                position: absolute;
+                top:5px;
+                left: 50px;
+                background-color: white;
+                opacity: 0.9;
+                padding: 5px;
+                border:solid 1px black;
+                width: 300px;
+                z-index: 100;
+            }
+            .close{
+                float:right;
+                margin: 5px;
             }
         </style>
         <script src="lib/ol.js" type="text/javascript"></script>
@@ -40,6 +52,16 @@
         <title>geomap</title>
     </head>
     <body>
+        <div class="help">
+            <button class="close" onclick="this.parentElement.remove()">X</button>
+            Shift+lewy klawisz myszy zaznacza obszar do pobrania.
+            Kliknięcie na zaznaczonym prostokoncie rozpocznie pobieranie fragmentu w nowym oknie.
+            W wyniku otrzymasz plik <a href="https://en.wikipedia.org/wiki/World_file">World File</a>
+            w układzie współrzędnych
+            <a href="https://pl.wikipedia.org/wiki/Uk%C5%82ad_wsp%C3%B3%C5%82rz%C4%99dnych_1992">PUWG-92</a>
+            opisujący pozycję mapy, którą możesz zapisać klikając na nim prawym klawiszem i wybierając 'Zapisz jako' lub 'Kopiuj obraz'.
+
+        </div>
         <div id="map" class="map"></div>       
         <select id="layerSelection" onchange="selectLayer(this)"></select>
         <table class="coords">
@@ -63,15 +85,26 @@
             var selection = new ol.source.Vector();
             var sources = {
                 'OpenStreetMap': new ol.source.OSM(),
+                'OpenCycleMap': new ol.source.XYZ({
+                    url: 'http://tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
+                }),
+                'UMP': new ol.source.XYZ({
+                    url: 'http://tiles.ump.waw.pl/ump_tiles/{z}/{x}/{y}.png'
+                })
             };
             [
                 'Road',
                 'Aerial',
                 'AerialWithLabels'
-            ].forEach(function(style){
-                sources['Bing: '+style] = new ol.source.BingMaps({
+            ].forEach(function (style) {
+                sources['Bing: ' + style] = new ol.source.BingMaps({
                     key: 'Apszeg5_v01g6cZjl_9VTYEcC_qchUYPEfVR64qdbgV5aRKfbYTbMeitv3bLEPkq',
                     imagerySet: style
+                });
+            });
+            ['osm', 'sat'].forEach(function (style) {
+                sources['MapQuest: ' + style] = new ol.source.MapQuest({
+                    layer: style
                 });
             });
 
