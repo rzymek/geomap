@@ -131,7 +131,8 @@
                                 className: '',
                                 target: document.getElementById('mercator')
                             }),
-                            new ol.control.ScaleLine()
+                            new ol.control.ScaleLine(),
+                            new ol.control.ZoomSlider()
                         ]),
                 layers: layers,
                 view: new ol.View({
