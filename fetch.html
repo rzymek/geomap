@@ -155,6 +155,7 @@
                 status.innerHTML = (total - tiles.length) + '/' + total;
                 canvas.height = (tileExact.x2 - tileExact.x1) * tileWidth;
                 canvas.width = (tileExact.y2 - tileExact.y1) * tileHeight;
+                document.getElementById('info').innerHTML = canvas.width + ' x '+canvas.height;
                 offset = {
                     y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileHeight,
                     x: (tileExact.y1 - Math.floor(tileExact.y1)) * tileWidth
@@ -201,11 +202,16 @@
                 margin-left: 0;
                 margin-right: 0;
             }
+            #info {
+                position: absolute;
+                right:5px;
+                top: 5px;
+            }
         </style>
     </head>
     <body onload="fetch()">        
         <img id="fetcher" width="64" height="64" alt="..." src="img/ajax-loader.gif">
-        <span id="status"></span>
+        <div id="info"></div> <span id="status"></span>
         <br>
         <canvas id="canvas" width="1" height="1"></canvas>
     </body>
