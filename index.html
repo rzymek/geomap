@@ -12,6 +12,12 @@
                 bottom:0;
                 z-index: 0;
             }
+            #layerSelection {
+                position: absolute;
+                top:5px;
+                right: 8px;
+                max-height: 25px;
+            }
             .coords {
                 padding: 3px;
                 position: absolute;
@@ -34,7 +40,8 @@
         <title>geomap</title>
     </head>
     <body>
-        <div id="map" class="map"></div>        
+        <div id="map" class="map"></div>       
+        <select id="layerSelection" onchange="selectLayer(this)"></select>
         <table class="coords">
             <tr>
                 <td>MGRS:</td><td id="mgrs"></td>
@@ -53,9 +60,31 @@
             var puwg92 = "EPSG:2180";
             proj4.defs(puwg92, "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
 
-            var source = new ol.source.Vector();
-            var vector = new ol.layer.Vector({
-                source: source,
+            var selection = new ol.source.Vector();
+            var sources = {
+                'OpenStreetMap': new ol.source.OSM(),
+            };
+            [
+                'Road',
+                'Aerial',
+                'AerialWithLabels'
+            ].forEach(function(style){
+                sources['Bing: '+style] = new ol.source.BingMaps({
+                    key: 'Apszeg5_v01g6cZjl_9VTYEcC_qchUYPEfVR64qdbgV5aRKfbYTbMeitv3bLEPkq',
+                    imagerySet: style
+                });
+            });
+
+            var layers = [];
+            Object.keys(sources).forEach(function (name) {
+                layers.push(new ol.layer.Tile({
+                    visible: false,
+                    preload: Infinity,
+                    source: sources[name]
+                }));
+            });
+            layers.push(new ol.layer.Vector({
+                source: selection,
                 style: new ol.style.Style({
                     fill: new ol.style.Fill({
                         color: 'rgba(255, 0, 0, 0.2)'
@@ -65,7 +94,7 @@
                         width: 2
                     })
                 })
-            });
+            }));
             var map = new ol.Map({
                 target: 'map',
                 controls: ol.control.defaults().extend(
@@ -104,40 +133,7 @@
                             }),
                             new ol.control.ScaleLine()
                         ]),
-                layers: [
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM(),
-                        opacity: 0.5
-                    }),
-                    vector /*,
-                     new ol.layer.Tile({
-                     opacity: 0.7,
-                     source: new ol.source.WMTS({
-                     //?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=MAPA%20TOPOGRAFICZNA&STYLE=default&FORMAT=image/jpeg&"
-                     //+ "TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${z}&"
-                     //+ "TILEROW=${y}&TILECOL=${x}
-                     url: 'http://mapy.geoportal.gov.pl/wss/service/WMTS/guest/wmts/TOPO',                            
-                     matrixSet: puwg92,
-                     format: 'image/jpeg',
-                     tileGrid: new ol.tilegrid.WMTS({
-                     origin: [850000.0,100000.0],
-                     resolutions: [12,11,10,9,8,7,6,5,4,3,2,1,0],
-                     tileSize: 512,
-                     matrixIds: [0,1,2,3,4,5,6,7,8,9,10,11,12]
-                     }),
-                     style: 'default'
-                     })
-                     }),
-                     new ol.layer.Tile({
-                     opacity: 0.7,
-                     source: new ol.source.TileDebug({
-                     projection: 'EPSG:3857',
-                     tileGrid: new ol.tilegrid.XYZ({
-                     maxZoom: 22
-                     })
-                     })
-                     })*/
-                ],
+                layers: layers,
                 view: new ol.View({
                     center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
                     zoom: 10
@@ -159,7 +155,7 @@
                 var y1 = extent[1];
                 var x2 = extent[2];
                 var y2 = extent[3];
-                source.clear();
+                selection.clear();
                 var box = new ol.Feature(new ol.geom.Polygon([
                     [
                         [x1, y1],
@@ -168,7 +164,7 @@
                         [x2, y1]
                     ]
                 ]));
-                source.addFeature(box);
+                selection.addFeature(box);
             });
             map.on('click', function (evt) {
                 var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
@@ -187,6 +183,21 @@
                 };
                 window.open('fetch.html', JSON.stringify(box));
             });
+
+            var layerSelection = document.getElementById('layerSelection');
+            Object.keys(sources).forEach(function (name) {
+                var option = document.createElement('option');
+                option.text = name;
+                layerSelection.add(option);
+            });
+            function selectLayer(combo) {
+                var idx = combo.selectedIndex;
+                var selectableSources = Object.keys(sources).length;
+                for (var i = 0; i < selectableSources; i++) {
+                    layers[i].setVisible(i === idx);
+                }
+            }
+            selectLayer({selectedIndex: 0});
         </script>
-</body>
+    </body>
 </html>
