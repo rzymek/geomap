@@ -63,7 +63,7 @@
             <a href="https://pl.wikipedia.org/wiki/Uk%C5%82ad_wsp%C3%B3%C5%82rz%C4%99dnych_1992">PUWG-92</a>
             opisujący pozycję mapy, którą możesz zapisać klikając na nim prawym klawiszem i wybierając 'Zapisz jako' lub 'Kopiuj obraz'.
             <p>
-            Ostatnio geoportal ma chwilowe problemy z serwowaniem map. W razie problemów odśwież stronę pobierania mapy.
+                Ostatnio geoportal ma chwilowe problemy z serwowaniem map. W razie problemów odśwież stronę pobierania mapy.
             </p>
             Wspierane przeglądarki:
             <a href="https://www.mozilla.org/firefox/">Firefox</a> i
@@ -239,6 +239,23 @@
                 }
             }
             selectLayer({selectedIndex: 0});
+        </script>
+        <script>
+            (function (i, s, o, g, r, a, m) {
+                i['GoogleAnalyticsObject'] = r;
+                i[r] = i[r] || function () {
+                    (i[r].q = i[r].q || []).push(arguments)
+                }, i[r].l = 1 * new Date();
+                a = s.createElement(o),
+                        m = s.getElementsByTagName(o)[0];
+                a.async = 1;
+                a.src = g;
+                m.parentNode.insertBefore(a, m)
+            })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
+
+            ga('create', 'UA-54107063-3', 'auto');
+            ga('send', 'pageview');
+
         </script>
     </body>
 </html>
