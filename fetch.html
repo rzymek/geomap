@@ -62,6 +62,13 @@
                     3061,
                     6121
                 ];
+                var topLeftCorner = {
+                    y: 850000.0, //X
+                    x: 100000.0//Y
+                };
+                var tileWidth = 512;
+                var tileHeight = 512;
+                
                 var tileZ = params.z;
                 var bBoxMinX = box.x1;
                 var bBoxMaxX = box.x2;
@@ -69,12 +76,6 @@
                 var bBoxMaxY = box.y2;
 
                 var scaleDenominator = scaleDenominators[tileZ];
-                var topLeftCorner = {
-                    y: 850000.0, //X
-                    x: 100000.0//Y
-                };
-                var tileWidth = 512;
-                var tileHeight = 512;
                 var matrixWidth = matrixWidths[tileZ];
                 var matrixHeight = matrixHeights[tileZ];
 
