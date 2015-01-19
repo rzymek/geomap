@@ -5,6 +5,9 @@
         <script src="capabilities/topo.js" type="text/javascript"></script>
         <script src="capabilities/orto.js" type="text/javascript"></script>
         <script src="capabilities/vmap.js" type="text/javascript"></script>
+        <script src="lib/ozimap.js" type="text/javascript"></script>
+        <script src="lib/proj4.js" type="text/javascript"></script>
+
         <meta charset="utf-8"> 
         <script type="text/javascript">
             var drawTileFrame = false;
@@ -153,13 +156,34 @@
                         status.innerHTML = 'Zapisz poniższy obraz oraz  <a href=""></a>';
                         var links = document.getElementById('links');
                         var basename = params.source + params.z + '_' + params.title;
-                        
-                        var link = document.createElement('a');
-                        link.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + getWorldFile());
-                        link.setAttribute('download', basename+".tfw");
-                        link.innerHTML = basename+".tfw"
-                        links.appendChild(link);
-                        
+
+                        function mklink(type, data) {
+                            var link = document.createElement('a');
+                            link.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(data));
+                            link.setAttribute('download', basename + "." + type);
+                            link.innerHTML = type.toUpperCase();
+                            links.appendChild(link);
+                        }
+
+                        proj4.defs("EPSG:2180", "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
+
+                        mklink("tfw", getWorldFile());
+                        links.appendChild(document.createTextNode(' lub '));
+                        mklink("map", getOziMap(basename, [
+                            /* 0  1 *
+                             * 2  3 */
+                            proj4("EPSG:2180", "WGS84", [box.x1, box.y2]),
+                            proj4("EPSG:2180", "WGS84", [box.x2, box.y2]),
+                            proj4("EPSG:2180", "WGS84", [box.x2, box.y1]),
+                            proj4("EPSG:2180", "WGS84", [box.x1, box.y1])
+                        ].map(function (it) {
+                            // [lon,lat] -> {lat:,lon:}
+                            return {
+                                lon: it[0],
+                                lat: it[1]
+                            };
+                        }), canvas.width, canvas.height));
+
                         img.remove();
                     }
                 };
