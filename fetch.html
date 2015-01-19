@@ -2,7 +2,6 @@
 <html lang="en">
     <head>
         <title>Fetch</title>
-        <script src="lib/FileSaver.min.js" type="text/javascript"></script>
         <script src="capabilities/topo.js" type="text/javascript"></script>
         <script src="capabilities/orto.js" type="text/javascript"></script>
         <script src="capabilities/vmap.js" type="text/javascript"></script>
@@ -49,7 +48,7 @@
 
                 var scaleDenominator = scaleDenominators[tileZ];
                 var matrixWidth = matrixSizes[tileZ].width;
-                var matrixHeight =  matrixSizes[tileZ].height;
+                var matrixHeight = matrixSizes[tileZ].height;
 
                 var metersPerUnit = 1;
                 var pixelSpan = scaleDenominator * 0.28e-3 / metersPerUnit;
@@ -103,8 +102,8 @@
                             .replace('{{y}}', Math.floor(tile.y));
                 }
 
-                function finished() {
-                    var tfw = [
+                function getWorldFile() {
+                    return [
                         pixelSpan, // poziomy rozmiar pixela w metrach
                         0, // odchylenie pionowe
                         0, // odchylenie poziome
@@ -112,8 +111,6 @@
                         box.x1, // pozioma współrzędna lewego górnego rogu
                         box.y2      // pionowa współrzędna lewego górnego rogu 
                     ].join('\n');
-                    var blob = new Blob([tfw], {type: "application/octet-stream"});
-                    saveAs(blob, params.source+'_'+params.z+'_'+params.title+'.tfw');
                 }
 
                 var tiles = [];
@@ -153,8 +150,16 @@
                         img.src = interpolate(tiles[0]);
                         status.innerHTML = (total - tiles.length) + '/' + total;
                     } else {
-                        status.innerHTML = 'Zapisz lub skopiuj poniższy obraz';
-                        finished();
+                        status.innerHTML = 'Zapisz poniższy obraz oraz  <a href=""></a>';
+                        var links = document.getElementById('links');
+                        var basename = params.source + params.z + '_' + params.title;
+                        
+                        var link = document.createElement('a');
+                        link.setAttribute('href', 'data:application/octet-stream;charset=utf-8,' + getWorldFile());
+                        link.setAttribute('download', basename+".tfw");
+                        link.innerHTML = basename+".tfw"
+                        links.appendChild(link);
+                        
                         img.remove();
                     }
                 };
@@ -167,8 +172,8 @@
                 transform-origin: 0 0;
                 width: 99%;
             }
-            #status {
-                font-size: 64px;
+            #status,#links {
+                font-size: 50px;
             }
             body {
                 overflow-x: hidden;
@@ -184,7 +189,10 @@
     </head>
     <body onload="fetch()">        
         <img id="fetcher" width="64" height="64" alt="..." src="img/ajax-loader.gif">
-        <div id="info"></div> <span id="status"></span>
+        <div id="info"></div> 
+        <span id="status"></span>
+        <span id="links">
+        </span>
         <br>
         <canvas id="canvas" width="1" height="1"></canvas>
     </body>
