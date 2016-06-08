@@ -7,9 +7,21 @@
     <script src="capabilities/vmap.js" type="text/javascript"></script>
     <script src="lib/ozimap.js" type="text/javascript"></script>
     <script src="lib/proj4.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        var exports = {};
+    </script>
+    <script src="lib/mgrs.js" type="text/javascript"></script>
 
     <meta charset="utf-8">
     <script type="text/javascript">
+        var puwg92 = "EPSG:2180";
+        proj4.defs(puwg92, "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
+
+        function drawGrid(svg, box) {
+            var tl = proj4("EPSG:2180", "WGS84", [box.x1, box.y2]);
+            var mgrs = exports.forward(tl, 5);
+            console.log(tl, mgrs, exports.inverse(mgrs));
+        }
 
         function svgNew(tag) {
             return document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -29,6 +41,7 @@
                     y2: query[6]
                 }
             };
+            window.document.title = params.title;
             var box = params.box;
 
             var source = window[params.source];
@@ -142,7 +155,6 @@
             var total = tiles.length;
             var status = document.getElementById('status');
             var canvas = document.getElementById('canvas');
-            status.innerHTML = (total - tiles.length) + '/' + total;
             var canvasSize = {
                 height: (tileExact.x2 - tileExact.x1) * tileWidth,
                 width: (tileExact.y2 - tileExact.y1) * tileHeight
@@ -172,7 +184,8 @@
                 layer.appendChild(image);
             });
 
-            status.innerHTML = 'Zapisz poniższy obraz oraz  <a href=""></a>';
+            drawGrid(canvas, box);
+
             var links = document.getElementById('links');
             var basename = params.source + params.z + '_' + params.title;
 
@@ -186,8 +199,8 @@
 
             proj4.defs("EPSG:2180", "+proj=tmerc +lat_0=0 +lon_0=19 +k=0.9993 +x_0=500000 +y_0=-5300000 +ellps=GRS80 +units=m +no_defs");
 
-            mklink("tfw", getWorldFile());
-            links.appendChild(document.createTextNode(' lub '));
+            mklink("svg", canvas.parentElement.innerHTML)
+            links.appendChild(document.createTextNode(', '));
             mklink("map", getOziMap(basename, [
                 /* 0  1 *
                  * 2  3 */
@@ -203,7 +216,7 @@
                 };
             }), canvas.width, canvas.height));
             links.appendChild(document.createTextNode(', '));
-            mklink("svg", canvas.parentElement.innerHTML)
+            mklink("tfw", getWorldFile());
         }
     </script>
     <style>
@@ -214,7 +227,7 @@
             height: auto;
         }
 
-        #status, #links {
+        #status, .links {
             font-size: 50px;
         }
 
@@ -229,14 +242,23 @@
             right: 5px;
             top: 5px;
         }
+        @media print {
+            .info {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body onload="fetch()">
-<div id="info"></div>
-<span id="status"></span>
-        <span id="links">
-        </span>
-<br>
+<div class="info">
+    <div id="info"></div>
+    <span id="status"></span>
+        <div class="links">
+            Zapisz
+            <span id="links"></span> lub <a href="javascript:window.print()">Drukuj</a>
+        </div>
+    <br>
+</div>
 <div>
     <svg id="canvas" width="1" height="1"
          xmlns="http://www.w3.org/2000/svg"
