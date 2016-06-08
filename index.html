@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="utf-8"> 
+        <meta charset="utf-8">
         <link rel="stylesheet" href="lib/ol.css" type="text/css">
         <style>
             .map {
@@ -67,7 +67,7 @@
             Razem z mapą otrzymasz pliki opisujące pozycję mapy:
             <ul>
                 <li><a href="https://en.wikipedia.org/wiki/World_file">World File</a> (TFW)
-                    w układzie współrzędnych <a href="https://pl.wikipedia.org/wiki/Uk%C5%82ad_wsp%C3%B3%C5%82rz%C4%99dnych_1992">PUWG-92</a> 
+                    w układzie współrzędnych <a href="https://pl.wikipedia.org/wiki/Uk%C5%82ad_wsp%C3%B3%C5%82rz%C4%99dnych_1992">PUWG-92</a>
                     </li>
                 <li><a href="http://www.oziexplorer3.com/">Ozi Map File</a></li>
             </ul>
@@ -292,7 +292,7 @@
                 var bbox = selectedBox.getGeometry().getExtent();
                 var puwg = ol.proj.transform(bbox, 'EPSG:3857', 'EPSG:2180');
                 var mgrsTopLeft = exports.forward(ol.proj.transform([bbox[0], bbox[1]], 'EPSG:3857', 'EPSG:4326'), 1);
-                window.open('fetch.html', JSON.stringify({
+                var def = {
                     z: document.getElementById('getZ').value,
                     source: document.getElementById('getSource').value,
                     title: mgrsTopLeft,
@@ -302,7 +302,16 @@
                         x2: puwg[2],
                         y2: puwg[3]
                     }
-                }));
+                };
+                window.open('fetch.html?' + [
+                            def.source,
+                            def.z,
+                            def.title,
+                            def.box.x1,
+                            def.box.y1,
+                            def.box.x2,
+                            def.box.y2
+                        ].map(encodeURIComponent).join('|'));
             }
 
             map.on('click', function (evt) {

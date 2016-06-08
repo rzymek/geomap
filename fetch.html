@@ -12,7 +12,18 @@
         <script type="text/javascript">
             var drawTileFrame = false;
             function fetch() {
-                var params = JSON.parse(window.name);
+                var query = location.search.substr(1).split('|').map(decodeURIComponent);
+                var params = {
+                    source: query[0],
+                    z: query[1],
+                    title: query[2],
+                    box: {
+                        x1: query[3],
+                        y1: query[4],
+                        x2: query[5],
+                        y2: query[6]
+                    }
+                };
                 var box = params.box;
 
                 var source = window[params.source];
