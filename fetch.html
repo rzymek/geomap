@@ -149,6 +149,8 @@
             };
             canvas.width.baseVal.value = canvasSize.width;
             canvas.height.baseVal.value = canvasSize.height;
+            canvas.viewBox.baseVal.width = canvasSize.width;
+            canvas.viewBox.baseVal.height = canvasSize.height;
             document.getElementById('info').innerHTML = canvasSize.width.toFixed(0) + ' x ' + canvasSize.height.toFixed(0);
             var offset = {
                 y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileHeight,
@@ -166,7 +168,7 @@
                 image.height.baseVal.value = tileHeight;
                 image.x.baseVal.value = -offset.x + x * tileWidth;
                 image.y.baseVal.value = -offset.y + y * tileHeight;
-                image.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href',interpolate(tile));
+                image.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', interpolate(tile));
                 layer.appendChild(image);
             });
 
@@ -209,6 +211,7 @@
             border: solid 1px black;
             transform-origin: 0 0;
             width: 99%;
+            height: auto;
         }
 
         #status, #links {
