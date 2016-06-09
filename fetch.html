@@ -7,7 +7,7 @@
     <script src="capabilities/vmap.js" type="text/javascript"></script>
     <script src="lib/ozimap.js" type="text/javascript"></script>
     <script src="lib/proj4.js" type="text/javascript"></script>
-
+    <script src="lib/linear.js" type="text/javascript"></script>
     <script type="text/javascript">
         var exports = {};
     </script>
@@ -49,6 +49,30 @@
                 y: arr[1]
             }
         }
+        function svgText(label, x, y, labelsLayer, labelsBgLayer, rotate) {
+            var text = svgNew('text');
+            text.textContent = label;
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('fill', '#000');
+            text.style.textAnchor = 'middle';
+            text.style.textAlign = 'center';
+            text.style.fontSize = '25px';
+            labelsLayer.appendChild(text);
+            var bbox = text.getBBox();
+            var rect = svgNew('rect');
+            rect.setAttribute("x", bbox.x);
+            rect.setAttribute("y", bbox.y);
+            rect.setAttribute("width", bbox.width);
+            rect.setAttribute("height", bbox.height);
+            rect.setAttribute("fill", "white");
+            labelsBgLayer.appendChild(rect, text);
+            if(rotate) {
+                text.setAttribute("transform", "rotate("+rotate+" "+(bbox.x+bbox.width/2)+" "+(bbox.y+bbox.height/2)+")");
+                rect.setAttribute("transform", "rotate("+rotate+" "+(bbox.x+bbox.width/2)+" "+(bbox.y+bbox.height/2)+")");
+            }
+            return {text: text, bbox: bbox, rect: rect};
+        }
         function drawGrid(svg, box, canvasSize) {
             var zone = utmZone(puwg2ll([box.x1, box.y1]));
             var puwg = [
@@ -72,16 +96,32 @@
                 return puwgToPx(utm2puwg(zone, coord));
             }
 
-            var layer = svgLayer(svg, 'grid');
-            for (var x = utmGrid[0].x; x <= utmGrid[1].x; x += 1000) {
-                var p1 = utmToPx({x:x, y:utmGrid[0].y});
-                var p2 = utmToPx({x:x, y:utmGrid[2].y});
-                layer.appendChild(svgLine(p1, p2));
+            var corners = [
+                {x: 0, y: 0},
+                {x: canvasSize.width, y: 0},
+                {x: canvasSize.width, y: canvasSize.height},
+                {x: 0, y: canvasSize.height}
+            ];
+            var gridLayer = svgLayer(svg, 'grid');
+            var labelsBgLayer = svgLayer(svg, 'labelsBg');
+            var labelsLayer = svgLayer(svg, 'labels');
+            for (var x = utmGrid[0].x - 1000; x <= utmGrid[1].x + 1000; x += 1000) {
+                var p1 = utmToPx({x: x, y: utmGrid[0].y - 1000});
+                var p2 = utmToPx({x: x, y: utmGrid[2].y + 1000});
+                gridLayer.appendChild(svgLine(p1, p2));
+                var top = linear.getIntersect(corners[0], corners[1], p1, p2);
+                var bottom = linear.getIntersect(corners[2], corners[3], p1, p2);
+                svgText(x, top.x, 25, labelsLayer, labelsBgLayer);
+                svgText(x, bottom.x, bottom.y-8, labelsLayer, labelsBgLayer);
             }
-            for (var y = utmGrid[0].y; y <= utmGrid[2].y; y += 1000) {
-                var p1 = utmToPx({x:utmGrid[0].x,y:y});
-                var p2 = utmToPx({x:utmGrid[2].x,y:y});
-                layer.appendChild(svgLine(p1, p2));
+            for (var y = utmGrid[0].y - 1000; y <= utmGrid[2].y + 1000; y += 1000) {
+                var p1 = utmToPx({x: utmGrid[0].x - 1000, y: y});
+                var p2 = utmToPx({x: utmGrid[2].x + 1000, y: y});
+                gridLayer.appendChild(svgLine(p1, p2));
+                var left = linear.getIntersect(corners[0], corners[3], p1, p2);
+                var right= linear.getIntersect(corners[1], corners[2], p1, p2);
+                svgText(y, 16, left.y, labelsLayer, labelsBgLayer, -90);
+                svgText(y, canvasSize.width-16, right.y, labelsLayer, labelsBgLayer, -90);
             }
         }
 
@@ -91,8 +131,9 @@
             line.setAttribute('y1', p1.y);
             line.setAttribute('x2', p2.x);
             line.setAttribute('y2', p2.y);
-            line.setAttribute('stroke', 'rgba(80,80,80,0.8)');
-            line.setAttribute('stroke-width', '1mm');
+            line.style.stroke = 'black';
+            line.style.strokeOpacity = 0.8;
+            line.style.strokeWidth = '1mm';
             return line;
         }
 
@@ -122,8 +163,8 @@
                     y2: query[6]
                 }
             };
-            document.getElementById('getSource').value=params.source;
-            document.getElementById('getZ').value=params.z;
+            document.getElementById('getSource').value = params.source;
+            document.getElementById('getZ').value = params.z;
             window.document.title = params.title;
             var box = params.box;
 
@@ -246,6 +287,8 @@
             canvas.height.baseVal.value = canvasSize.height;
 //            canvas.viewBox.baseVal.x = -canvasSize.width;
 //            canvas.viewBox.baseVal.y = -canvasSize.height;
+//            canvas.viewBox.baseVal.width = 3*canvasSize.width;
+//            canvas.viewBox.baseVal.height = 3*canvasSize.height;
             canvas.viewBox.baseVal.width = canvasSize.width;
             canvas.viewBox.baseVal.height = canvasSize.height;
             document.getElementById('info').innerHTML = canvasSize.width.toFixed(0) + ' x ' + canvasSize.height.toFixed(0);
