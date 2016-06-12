@@ -4,10 +4,13 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = {
-    entry: './src/index.js',
+    entry: {
+        index: './src/index.js',
+        fetch: './src/fetch.js'
+    },
     output: {
         path: 'dist',
-        filename: 'bundle.js'
+        filename: '[name].js'
     },
     module: {
         loaders: [
@@ -29,6 +32,12 @@ module.exports = {
             }
         }),
         new HtmlWebpackPlugin({
-            title: 'geomap'
+            title: 'geomap',
+            chunks: ['index']
+        }),
+        new HtmlWebpackPlugin({
+            title: 'geomap',
+            filename: 'fetch.html',
+            chunks: ['fetch']
         })]
 };
