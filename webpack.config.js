@@ -5,12 +5,12 @@ var FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = {
     entry: {
-        index: './src/index.js',
-        fetch: './src/fetch.js'
+        index: './src/entry/index.js',
+        fetch: './src/entry/fetch.js'
     },
     output: {
         path: 'dist',
-        filename: '[name].js'
+        filename: '[name].[hash].js'
     },
     module: {
         loaders: [
