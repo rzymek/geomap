@@ -21,8 +21,15 @@ module.exports = {
                 query: {
                     presets: ['es2015', 'react']
                 }
+            }, {
+                test: /\.ts?$/,
+                loader: "ts-loader"
             }
         ]
+    },
+    externals: {
+        "react": "React",
+        "react-dom": "ReactDOM"
     },
     plugins: [
         new FaviconsWebpackPlugin({

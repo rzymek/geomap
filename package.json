@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/rzymek/geomap#readme",
   "dependencies": {
+    "proj4": "^2.3.14",
     "react": "^15.1.0",
     "react-dom": "^15.1.0"
   },
@@ -32,6 +33,9 @@
     "babel-preset-react": "^6.5.0",
     "favicons-webpack-plugin": "0.0.6",
     "html-webpack-plugin": "^2.20.0",
+    "source-map-loader": "^0.1.5",
+    "ts-loader": "^0.8.2",
+    "typescript": "^1.8.10",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1"
   }
