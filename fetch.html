@@ -88,7 +88,7 @@
             function puwgToPx(coord) {
                 return {
                     x: (coord.x - box.x1) / (box.x2 - box.x1) * canvasSize.width,
-                    y: (coord.y - box.y1) / (box.y2 - box.y1) * canvasSize.height
+                    y: (coord.y - box.y2) / (box.y1 - box.y2) * canvasSize.height
                 }
             }
 
@@ -337,7 +337,7 @@
                     lon: it[0],
                     lat: it[1]
                 };
-            }), canvas.width, canvas.height));
+            }), canvasSize.width, canvasSize.height));
             links.appendChild(document.createTextNode(', '));
             mklink("tfw", getWorldFile());
         }
