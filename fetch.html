@@ -289,8 +289,7 @@
 //            canvas.viewBox.baseVal.y = -canvasSize.height;
 //            canvas.viewBox.baseVal.width = 3*canvasSize.width;
 //            canvas.viewBox.baseVal.height = 3*canvasSize.height;
-            canvas.viewBox.baseVal.width = canvasSize.width;
-            canvas.viewBox.baseVal.height = canvasSize.height;
+            canvas.setAttribute('viewBox', "0 0 "+canvasSize.width+" "+canvasSize.height);
             document.getElementById('info').innerHTML = canvasSize.width.toFixed(0) + ' x ' + canvasSize.height.toFixed(0);
             var offset = {
                 y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileHeight,
