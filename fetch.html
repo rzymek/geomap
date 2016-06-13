@@ -67,9 +67,9 @@
             rect.setAttribute("height", bbox.height);
             rect.setAttribute("fill", "white");
             labelsBgLayer.appendChild(rect, text);
-            if(rotate) {
-                text.setAttribute("transform", "rotate("+rotate+" "+(bbox.x+bbox.width/2)+" "+(bbox.y+bbox.height/2)+")");
-                rect.setAttribute("transform", "rotate("+rotate+" "+(bbox.x+bbox.width/2)+" "+(bbox.y+bbox.height/2)+")");
+            if (rotate) {
+                text.setAttribute("transform", "rotate(" + rotate + " " + (bbox.x + bbox.width / 2) + " " + (bbox.y + bbox.height / 2) + ")");
+                rect.setAttribute("transform", "rotate(" + rotate + " " + (bbox.x + bbox.width / 2) + " " + (bbox.y + bbox.height / 2) + ")");
             }
             return {text: text, bbox: bbox, rect: rect};
         }
@@ -112,17 +112,23 @@
                 var top = linear.getIntersect(corners[0], corners[1], p1, p2);
                 var bottom = linear.getIntersect(corners[2], corners[3], p1, p2);
                 svgText(x, top.x, 25, labelsLayer, labelsBgLayer);
-                svgText(x, bottom.x, bottom.y-8, labelsLayer, labelsBgLayer);
+                svgText(x, bottom.x, bottom.y - 8, labelsLayer, labelsBgLayer);
             }
             for (var y = utmGrid[0].y - 1000; y <= utmGrid[2].y + 1000; y += 1000) {
                 var p1 = utmToPx({x: utmGrid[0].x - 1000, y: y});
                 var p2 = utmToPx({x: utmGrid[2].x + 1000, y: y});
                 gridLayer.appendChild(svgLine(p1, p2));
                 var left = linear.getIntersect(corners[0], corners[3], p1, p2);
-                var right= linear.getIntersect(corners[1], corners[2], p1, p2);
+                var right = linear.getIntersect(corners[1], corners[2], p1, p2);
                 svgText(y, 16, left.y, labelsLayer, labelsBgLayer, -90);
-                svgText(y, canvasSize.width-16, right.y, labelsLayer, labelsBgLayer, -90);
+                svgText(y, canvasSize.width - 16, right.y, labelsLayer, labelsBgLayer, -90);
             }
+            var docRect = svgNew('rect', svgLayer(svg, 'document'));
+            docRect.setAttribute('x', '-5');
+            docRect.setAttribute('y', '-5');
+            docRect.setAttribute('width', canvasSize.width + 10);
+            docRect.setAttribute('height', canvasSize.height + 10);
+            docRect.setAttribute('style', 'fill:none;stroke:red;stroke-width:10;stroke-opacity:1')
         }
 
         function svgLine(p1, p2, color, w) {
@@ -137,8 +143,12 @@
             return line;
         }
 
-        function svgNew(tag) {
-            return document.createElementNS('http://www.w3.org/2000/svg', tag);
+        function svgNew(tag, parent) {
+            var elem = document.createElementNS('http://www.w3.org/2000/svg', tag);
+            if (parent !== undefined) {
+                parent.appendChild(elem)
+            }
+            return elem;
         }
 
         function svgLayer(svg, name) {
@@ -289,7 +299,7 @@
 //            canvas.viewBox.baseVal.y = -canvasSize.height;
 //            canvas.viewBox.baseVal.width = 3*canvasSize.width;
 //            canvas.viewBox.baseVal.height = 3*canvasSize.height;
-            canvas.setAttribute('viewBox', "0 0 "+canvasSize.width+" "+canvasSize.height);
+            canvas.setAttribute('viewBox', "0 0 " + canvasSize.width + " " + canvasSize.height);
             document.getElementById('info').innerHTML = canvasSize.width.toFixed(0) + ' x ' + canvasSize.height.toFixed(0);
             var offset = {
                 y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileHeight,
