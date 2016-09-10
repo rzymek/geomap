@@ -6,13 +6,27 @@
   "repository": "https://github.com/rzymek/geomap",
   "scripts": {
     "start": "webpack-dev-server --progress --colors",
-    "build": "webpack --progress --colors"
+    "build": "webpack --progress --colors",
+    "test": "karma start --single-run"
   },
   "devDependencies": {
+    "@types/chai": "^3.4.32",
     "@types/lodash": "^4.14.34",
+    "@types/mocha": "^2.2.31",
     "@types/react": "^0.14.34",
     "@types/react-dom": "^0.14.16",
+    "chai": "^3.5.0",
+    "enzyme": "^2.4.1",
     "html-webpack-plugin": "^2.22.0",
+    "karma": "^1.1.1",
+    "karma-chai": "^0.1.0",
+    "karma-mocha": "^1.1.1",
+    "karma-phantomjs-launcher": "^1.0.1",
+    "karma-typescript-preprocessor2": "^1.2.1",
+    "karma-webpack": "^1.7.0",
+    "mocha": "^2.5.3",
+    "phantomjs-prebuilt": "^2.1.7",
+    "react-addons-test-utils": "^15.2.1",
     "source-map-loader": "0.1.5",
     "ts-loader": "0.8.2",
     "typescript": "2.0.2",
