@@ -3,12 +3,18 @@ const path = require('path');
 const webpack = require('webpack');
 // const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-// const target = process.env.OUTDIR || path.join(__dirname, 'dist');
 
+const CHUNKS = ['index', 'fetch'];
+
+function htmlForChunk(name) {
+    return new HtmlWebpackPlugin({
+        filename: `${name}.html`,
+        template: 'src/template.html',
+        chunks: [name]
+    })
+}
 module.exports = {
-    entry: {
-        index: ['./src/index.tsx']
-    },
+    entry: CHUNKS.reduce((dict, name) => (dict[name] = `./src/${name}.tsx`, dict), {}),
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, "dist"),
@@ -22,16 +28,12 @@ module.exports = {
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin({
-            compressor: {
-                // warnings: false
-            }
-        }),
-        new HtmlWebpackPlugin({  // Also generate a test.html
-            filename: 'index.html',
-            template: 'src/template.html',
-            chunks: "index"
-        })
+        // new webpack.optimize.UglifyJsPlugin({
+        //     compressor: {
+        //         warnings: false
+        //     }
+        // }),
+        ...CHUNKS.map(name => htmlForChunk(name))
     ],
     module: {
         loaders: [{

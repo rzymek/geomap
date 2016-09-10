@@ -5,7 +5,7 @@
   "description": "Geoportal MGRS SVG maps",
   "repository": "https://github.com/rzymek/geomap",
   "scripts": {
-    "start": "webpack-dev-server --progress --colors",
+    "start": "webpack-dev-server --progress --colors --inline --hot",
     "build": "webpack --progress --colors",
     "test": "karma start --single-run"
   },
