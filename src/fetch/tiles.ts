@@ -1,4 +1,4 @@
-
+import './getTileBounds.d.ts'
 
 function tiles(source:TileSource, params:Params, box:Box) {
     const url = `${source.url}?SERVICE=WMTS&
@@ -14,7 +14,7 @@ function tiles(source:TileSource, params:Params, box:Box) {
 
     function interpolate(tile) {
         return url
-            .replace('{{z}}', Math.floor(params.z) as string)
+            .replace('{{z}}', Math.floor(params.z).toString())
             .replace('{{x}}', Math.floor(tile.x) as string)
             .replace('{{y}}', Math.floor(tile.y) as string);
     }

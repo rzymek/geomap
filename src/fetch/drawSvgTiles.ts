@@ -1,4 +1,6 @@
-export  default function drawSvgTiles(url:string, tileBounds:Box, tileExact, canvas:SVGSVGElement, tileDim:Dim, tileZ:number) {
+import './getTileBounds.d.ts';
+
+export default function drawSvgTiles(url:string, tileBounds:Box, tileExact, canvas:SVGSVGElement, tileDim:Dim, tileZ:number) {
 
     const tiles = [];
     for (var x = tileBounds.x1; x <= tileBounds.x2; x++) {
