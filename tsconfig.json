@@ -1,20 +1,13 @@
 {
   "compilerOptions": {
-    "outDir": "./dist/",
     "sourceMap": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "module": "commonjs",
     "target": "es5",
     "jsx": "react",
     "rootDir": "src",
     "moduleResolution": "node"
   },
-  "filesGlob": [
-    "**/*.ts",
-    "**/*.tsx",
-    "!node_modules/**"
-  ],
   "files": [
-    "./src/untyped.d.ts"
   ]
 }

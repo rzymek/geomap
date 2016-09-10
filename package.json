@@ -5,50 +5,24 @@
   "description": "Geoportal MGRS SVG maps",
   "repository": "https://github.com/rzymek/geomap",
   "scripts": {
-    "clean": "rimraf dist",
-    "build:webpack": "cross-env NODE_ENV=production webpack --progress --config webpack.config.prod.js --bail --profile",
-    "build": "npm run clean && npm run build:webpack",
-    "start": "node devServer.js",
-    "test": "karma start --single-run "
+    "start": "webpack-dev-server --progress --colors",
+    "build": "webpack --progress --colors"
   },
   "devDependencies": {
-    "autoprefixer": "6.3.7",
-    "chai": "^3.5.0",
-    "cross-env": "1.0.8",
-    "css-loader": "0.23.1",
-    "enzyme": "^2.4.1",
-    "express": "4.14.0",
-    "express-http-proxy": "0.6.0",
-    "extract-text-webpack-plugin": "^1.0.1",
-    "file-loader": "0.9.0",
-    "karma": "^1.1.1",
-    "karma-chai": "^0.1.0",
-    "karma-junit-reporter": "^1.1.0",
-    "karma-mocha": "^1.1.1",
-    "karma-phantomjs-launcher": "^1.0.1",
-    "karma-typescript-preprocessor2": "^1.2.1",
-    "karma-webpack": "^1.7.0",
-    "mocha": "^2.5.3",
-    "phantomjs-prebuilt": "^2.1.7",
-    "postcss": "^5.1.1",
-    "postcss-loader": "^0.9.1",
-    "react-addons-test-utils": "^15.2.1",
+    "@types/lodash": "^4.14.34",
+    "@types/react": "^0.14.34",
+    "@types/react-dom": "^0.14.16",
+
     "source-map-loader": "0.1.5",
-    "style-loader": "0.13.1",
     "ts-loader": "0.8.2",
     "typescript": "2.0.2",
-    "url-loader": "0.5.7",
     "webpack": "1.13.1",
     "webpack-dev-middleware": "1.6.1",
     "webpack-hot-middleware": "2.12.0"
   },
   "dependencies": {
-    "babel-polyfill": "6.9.1",
-    "classnames": "2.2.5",
-    "immutable": "3.8.1",
-    "isomorphic-fetch": "2.2.1",
     "lodash": "4.15.0",
-    "react": "15.2.1",
-    "react-dom": "15.2.0"
+    "react": "15.3.1",
+    "react-dom": "15.3.1"
   }
 }
