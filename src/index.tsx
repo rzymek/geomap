@@ -4,6 +4,6 @@ import * as _ from "lodash";
 
 console.log(_);
 ReactDOM.render(
-    <h1>OK</h1>,
+    <h1>{_.range(0,10).join(', ')}</h1>,
     document.getElementById("root")
 );

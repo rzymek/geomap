@@ -1,7 +1,20 @@
 const path = require('path');
 const _ = require("lodash");
 const webpackConfig = require('./webpack.config.dev.js');
-
+/*
+ "chai": "^3.5.0",
+ "enzyme": "^2.4.1",
+ "karma": "^1.1.1",
+ "karma-chai": "^0.1.0",
+ "karma-junit-reporter": "^1.1.0",
+ "karma-mocha": "^1.1.1",
+ "karma-phantomjs-launcher": "^1.0.1",
+ "karma-typescript-preprocessor2": "^1.2.1",
+ "karma-webpack": "^1.7.0",
+ "mocha": "^2.5.3",
+ "phantomjs-prebuilt": "^2.1.7",
+ "react-addons-test-utils": "^15.2.1",
+ */
 module.exports = function (config) {
     config.set({
         basePath: 'src',

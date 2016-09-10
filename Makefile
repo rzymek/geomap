@@ -1,14 +1,11 @@
 .PHONY: clean all dev
 
 all: dist
-
-dist:  $(wildcard src/**/* webpack.config.js)
+dev: node_modules
+	npm start
+dist:  $(wildcard src/**/* webpack.config.js) node_modules
 	npm run build
-#dist/%.html: src/%.html dist
-#	cp $< $@
-#dist:
-#	mkdir $@
+node_modules:
+	npm install
 clean:
 	rm -rf dist
-dev:
-	npm start

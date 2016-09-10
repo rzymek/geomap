@@ -1,10 +1,9 @@
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 const webpack = require('webpack');
-const autoprefixer = require('autoprefixer');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+// const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const target = process.env.OUTDIR || path.join(__dirname, 'dist');
+// const target = process.env.OUTDIR || path.join(__dirname, 'dist');
 
 module.exports = {
     entry: {
