@@ -2,6 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as _ from "lodash";
 import {Select} from "./components/Select";
+import {setupProjections} from "./logic/proj4defs";
 
 const LEVELS: {[zoom: number]: string} = _.chain({
     7: '1:50 000',
@@ -39,6 +40,7 @@ class Fetch extends React.Component<{},FetchState> {
     }
 }
 
+setupProjections();
 
 ReactDOM.render(
     <Fetch/>,

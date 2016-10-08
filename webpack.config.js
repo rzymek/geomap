@@ -23,7 +23,7 @@ module.exports = {
         // root: ['src', 'node_modules'].map(function (dir) {
         //     return path.resolve(__dirname, dir)
         // }),
-        extensions: ['', '.js', '.ts', '.tsx']
+        extensions: ['', '.js', '.d.ts', '.ts', '.tsx']
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
