@@ -9,5 +9,6 @@
     "moduleResolution": "node"
   },
   "files": [
+    "src/untyped.d.ts"
   ]
 }
