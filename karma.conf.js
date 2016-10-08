@@ -20,9 +20,16 @@ module.exports = function (config) {
                 'react/addons': true,
                 'react/lib/ExecutionEnvironment': true,
                 'react/lib/ReactContext': true
+            },
+            context: __dirname,
+            node: {
+                __filename: true
             }
         },
-        reporters: ['progress'],
+        reporters: ['mocha'],
+        mochaReporter: {
+            showDiff: true
+        },
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
