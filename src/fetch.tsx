@@ -18,24 +18,65 @@ const LAYERS = {
     orto: 'Ortofotomapa'
 };
 
+
+function getParameters() {
+    const query = location.search
+        .substr(1) //skip '?'
+        .split('|')
+        .map(decodeURIComponent);
+    return {
+        source: query[0],
+        z: Number(query[1]),
+        title: query[2],
+        box: {
+            x1: Number(query[3]),
+            y1: Number(query[4]),
+            x2: Number(query[5]),
+            y2: Number(query[6])
+        }
+    };
+}
 interface FetchState {
-    layer?: string,
-    level?: string
+    source?: string,
+    z?: number,
+    title?: string,
+    box?: {
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number
+    }
 }
 class Fetch extends React.Component<{},FetchState> {
 
     constructor(props: {}) {
         super(props);
         this.state = {
-            layer: _(LAYERS).keys().head(),
-            level: _(LEVELS).keys().head()
+            source: _(LAYERS).keys().head(),
+            z: _(LEVELS).keys().map(Number).head()
         }
+    }
+
+    componentDidMount() {
+        this.setState(getParameters());
     }
 
     render() {
         return <div>
-            <Select values={LAYERS} onChange={(layer) => this.setState({layer})}/>
-            <Select values={LEVELS} onChange={(level) => this.setState({level})}/>
+            <Select values={LAYERS}
+                    value={this.state.source}
+                    onChange={(layer) => this.setState({source: layer})}/>
+            <Select values={LEVELS}
+                    value={String(this.state.z)}
+                    onChange={(level) => this.setState({z: Number(level)})}/>
+            <svg id="canvas"
+                 width="1" height="1"
+                 style={{
+                    border: 'solid 1px black',
+                    transformOrigin: '0 0',
+                    width: '99%',
+                    height: 'auto'
+            }}/>
         </div>;
     }
 }
