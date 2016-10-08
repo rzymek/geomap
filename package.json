@@ -24,6 +24,7 @@
     "karma-chai": "0.1.0",
     "karma-mocha": "1.2.0",
     "karma-mocha-reporter": "2.2.0",
+    "karma-notify-reporter": "1.0.1",
     "karma-phantomjs-launcher": "1.0.2",
     "karma-typescript-preprocessor2": "1.2.1",
     "karma-webpack": "1.8.0",

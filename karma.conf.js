@@ -26,7 +26,7 @@ module.exports = function (config) {
                 __filename: true
             }
         },
-        reporters: ['mocha'],
+        reporters: ['mocha', 'notify'],
         mochaReporter: {
             showDiff: true
         },
