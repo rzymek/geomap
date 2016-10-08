@@ -36,6 +36,7 @@ module.exports = {
         ...CHUNKS.map(name => htmlForChunk(name))
     ],
     module: {
+        noParse: /[/]proj4.js$/,
         loaders: [{
             test: /\.tsx?$/,
             loaders: ['ts-loader']
