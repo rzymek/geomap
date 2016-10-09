@@ -14,7 +14,7 @@ export class GridLine extends React.Component<GridLineProps,{}> {
         const style = {
             stroke: 'black',
             strokeOpacity: 0.8,
-            strokeWidth: '1mm'
+            strokeWidth: '0.8mm'
         };
         return <line
             x1={p1.x} y1={p1.y}
