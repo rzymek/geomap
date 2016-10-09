@@ -9,6 +9,7 @@ import {
 import {orto} from "./capabilities/orto";
 import {topo} from "./capabilities/topo";
 import {calc} from "./logic/calc";
+import {GridLine} from "./fetch/GridLine"
 
 const LEVELS: {[zoom: number]: string} = _.chain({
     7: '1:50 000',
@@ -73,16 +74,17 @@ class Fetch extends React.Component<{},FetchState> {
 
     constructor(props: {}) {
         super(props);
-        this.state = getParameters();/*{
-            source: _(LAYERS).keys().head(),
-            z: _(LEVELS).keys().map(Number).head(),
-            box: {
-                x1: NaN,
-                y1: NaN,
-                x2: NaN,
-                y2: NaN
-            }
-        }*/
+        this.state = getParameters();
+        /*{
+         source: _(LAYERS).keys().head(),
+         z: _(LEVELS).keys().map(Number).head(),
+         box: {
+         x1: NaN,
+         y1: NaN,
+         x2: NaN,
+         y2: NaN
+         }
+         }*/
     }
 
     componentDidMount() {
@@ -122,6 +124,8 @@ class Fetch extends React.Component<{},FetchState> {
             return puwgToPx(utm2puwg(zone, coord));
         }
 
+
+        const GRID_STEP = 1000;
         return <div>
             <Select values={_.mapValues(LAYERS, v=>v.label)}
                     value={this.state.source}
@@ -130,6 +134,7 @@ class Fetch extends React.Component<{},FetchState> {
                     value={String(this.state.z)}
                     onChange={(level) => this.setState({z: Number(level)})}/>
             <svg id="canvas"
+                 viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
                  width={canvasSize.width} height={canvasSize.height}
                  style={{
                     border: 'solid 1px black',
@@ -137,20 +142,20 @@ class Fetch extends React.Component<{},FetchState> {
                     width: '99%',
                     height: 'auto'
             }}>
-                {_.range(utmGrid[0].x - 1000, utmGrid[1].x + 1000, 1000).map(x => {
-                    var p1 = utmToPx({x: x, y: utmGrid[0].y - 1000});
-                    var p2 = utmToPx({x: x, y: utmGrid[2].y + 1000});
-                    return <line
-                        key={x}
-                        x1={p1.x} y1={p1.y}
-                        x2={p2.x} y2={p2.y}
-                        style={{
-                            stroke:'black',
-                            strokeOpacity: 0.8,
-                            strokeWidth: '1mm'
-                        } as any}
-                    />
-                })}
+                {_.range(utmGrid[0].x - GRID_STEP, utmGrid[1].x + GRID_STEP, GRID_STEP)
+                    .map(x => ({
+                        p1: utmToPx({x, y: utmGrid[0].y - GRID_STEP}),
+                        p2: utmToPx({x, y: utmGrid[2].y + GRID_STEP})
+                    }))
+                    .map((line, idx) => <GridLine key={idx} line={line}/>)
+                }
+                {_.range(utmGrid[0].y - GRID_STEP, utmGrid[2].y + GRID_STEP, GRID_STEP)
+                    .map(y => ({
+                        p1: utmToPx({x: utmGrid[0].x - GRID_STEP, y}),
+                        p2: utmToPx({x: utmGrid[2].x + GRID_STEP, y})
+                    }))
+                    .map((line, idx) => <GridLine key={idx} line={line}/>)
+                }
             </svg>
         </div>;
     }
