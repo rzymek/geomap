@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import * as ReactDOMServer from "react-dom/server";
 import * as _ from "lodash";
 import {Select} from "./components/Select";
 import {setupProjections} from "./logic/proj4defs";
@@ -70,7 +71,7 @@ class Fetch extends React.Component<{},MapParams> {
 
     render() {
         const def: any = LAYERS[this.state.source].def;
-
+        const svg = <SVGMap def={def} params={this.state}/>;
         return <div>
             <div>
                 <Select values={_.mapValues(LAYERS, v=>v.label)}
@@ -79,9 +80,14 @@ class Fetch extends React.Component<{},MapParams> {
                 <Select values={LEVELS}
                         value={String(this.state.z)}
                         onChange={(level) => this.setState({z: Number(level)})}/>
+                <a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} download={`${this.state.title}.svg`}>SVG</a>
             </div>
-            <SVGMap def={def} params={this.state}/>
+            {svg}
         </div>;
+    }
+
+    private dataURL(data: string) {
+        return 'data:application/octet-stream;charset=utf-8,' + encodeURIComponent(data)
     }
 }
 
