@@ -1,4 +1,4 @@
-import * as React from "react";
+ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as _ from "lodash";
 import {Select} from "./components/Select";
@@ -10,6 +10,7 @@ import {orto} from "./capabilities/orto";
 import {topo} from "./capabilities/topo";
 import {calc} from "./logic/calc";
 import {GridLine} from "./fetch/GridLine"
+import {MapTiles} from "./fetch/MapTiles"
 
 const LEVELS: {[zoom: number]: string} = _.chain({
     7: '1:50 000',
@@ -50,7 +51,7 @@ function getParameters() {
     };
 }
 
-interface FetchState {
+export interface MapParams {
     source?: string,
     z?: number,
     title?: string,
@@ -70,7 +71,7 @@ function pairToObj(arr: CoordinatesArray) {
         y: arr[1]
     }
 }
-class Fetch extends React.Component<{},FetchState> {
+class Fetch extends React.Component<{},MapParams> {
 
     constructor(props: {}) {
         super(props);
@@ -91,20 +92,6 @@ class Fetch extends React.Component<{},FetchState> {
             [box.x1, box.y2],
         ];
         const def: any = LAYERS[this.state.source].def;
-        const url: string = `${def.url}?
-            SERVICE=WMTS&REQUEST=GetTile&
-            VERSION=1.0.0&
-            LAYER=${def.name}&
-            STYLE=default&
-            FORMAT=${def.format}&
-            TILEMATRIXSET=EPSG:2180&
-            TILEMATRIX=EPSG:2180:{{z}}&
-            TILEROW={{x}}&
-            TILECOL={{y}}`.replace(/\s/g, '');
-        const interpolate = (tile: CoordinatesXY) => url
-            .replace('{{z}}', Math.floor(this.state.z).toString())
-            .replace('{{x}}', Math.floor(tile.x).toString())
-            .replace('{{y}}', Math.floor(tile.y).toString());
 
         const utmGrid = puwg
             .map(c => puwg2utm(zone, c))
@@ -130,39 +117,6 @@ class Fetch extends React.Component<{},FetchState> {
             return puwgToPx(utm2puwg(zone, coord));
         }
 
-        const epsilon = 1e-6;
-        const tileBounds = {
-            x1: Math.floor(tileExact.x1 + epsilon),
-            y1: Math.floor(tileExact.y1 + epsilon),
-            x2: Math.floor(tileExact.x2 - epsilon),
-            y2: Math.floor(tileExact.y2 - epsilon)
-        };
-        const offset = {
-            y: (tileExact.x1 - Math.floor(tileExact.x1)) * tileSize.height,
-            x: (tileExact.y1 - Math.floor(tileExact.y1)) * tileSize.width
-        };
-        const tiles = _.chain(_.range(tileBounds.x1, tileBounds.x2 + 1))
-            .map(x => _.range(tileBounds.y1, tileBounds.y2 + 1).map(y => ({x, y})))
-            .flatten()
-            .map((tile: CoordinatesXY) => ({
-                x: tile.y - tileBounds.y1,
-                y: tile.x - tileBounds.x1,
-                url: interpolate(tile)
-            })).map(pos => ({
-                x: -offset.x + pos.x * tileSize.width,
-                y: -offset.y + pos.y * tileSize.height,
-                width: tileSize.width,
-                height: tileSize.height,
-                url: pos.url
-            })).map(it =>
-                <image key={it.url}
-                       href={it.url}
-                       x={it.x}
-                       y={it.y}
-                       width={it.width}
-                       height={it.height}/>
-            ).value()
-
         const GRID_STEP = 1000;
         return <div>
             <Select values={_.mapValues(LAYERS, v=>v.label)}
@@ -180,7 +134,7 @@ class Fetch extends React.Component<{},FetchState> {
                     width: '99%',
                     height: 'auto'
             }}>
-                {tiles}
+                <MapTiles def={def} params={this.state}/>
                 {_.range(utmGrid[0].x - GRID_STEP, utmGrid[1].x + GRID_STEP, GRID_STEP)
                     .map(x => ({
                         p1: utmToPx({x, y: utmGrid[0].y - GRID_STEP}),
