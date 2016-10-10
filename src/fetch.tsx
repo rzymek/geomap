@@ -1,16 +1,11 @@
- import * as React from "react";
+import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as _ from "lodash";
 import {Select} from "./components/Select";
-import {
-    setupProjections, puwg2ll, utmZone, puwg2utm, CoordinatesArray, CoordinatesXY,
-    utm2puwg
-} from "./logic/proj4defs";
+import {setupProjections} from "./logic/proj4defs";
 import {orto} from "./capabilities/orto";
 import {topo} from "./capabilities/topo";
-import {calc} from "./logic/calc";
-import {GridLine} from "./fetch/GridLine"
-import {MapTiles} from "./fetch/MapTiles"
+import {SVGMap} from "./fetch/SVGMap";
 
 const LEVELS: {[zoom: number]: string} = _.chain({
     7: '1:50 000',
@@ -62,15 +57,6 @@ export interface MapParams {
         y2: number
     }
 }
-function toKM(v: number) {
-    return Math.round(v / 1000) * 1000;
-}
-function pairToObj(arr: CoordinatesArray) {
-    return {
-        x: arr[0],
-        y: arr[1]
-    }
-}
 class Fetch extends React.Component<{},MapParams> {
 
     constructor(props: {}) {
@@ -83,73 +69,18 @@ class Fetch extends React.Component<{},MapParams> {
     }
 
     render() {
-        const {box} = this.state;
-        const zone = utmZone(puwg2ll([box.x1, box.y1]));
-        const puwg: CoordinatesArray[] = [
-            [box.x1, box.y1],
-            [box.x2, box.y1],
-            [box.x2, box.y2],
-            [box.x1, box.y2],
-        ];
         const def: any = LAYERS[this.state.source].def;
 
-        const utmGrid = puwg
-            .map(c => puwg2utm(zone, c))
-            .map(c => c.map(toKM))
-            .map(pairToObj);
-        const {tileExact, tileSize} = calc(
-            this.state,
-            def
-        );
-        const canvasSize = {
-            height: (tileExact.x2 - tileExact.x1) * tileSize.width,
-            width: (tileExact.y2 - tileExact.y1) * tileSize.height
-        };
-
-        function puwgToPx(coord: CoordinatesXY): CoordinatesXY {
-            return {
-                x: (coord.x - box.x1) / (box.x2 - box.x1) * canvasSize.width,
-                y: (coord.y - box.y2) / (box.y1 - box.y2) * canvasSize.height
-            }
-        }
-
-        function utmToPx(coord: CoordinatesXY): CoordinatesXY {
-            return puwgToPx(utm2puwg(zone, coord));
-        }
-
-        const GRID_STEP = 1000;
         return <div>
-            <Select values={_.mapValues(LAYERS, v=>v.label)}
-                    value={this.state.source}
-                    onChange={(layer) => this.setState({source: layer})}/>
-            <Select values={LEVELS}
-                    value={String(this.state.z)}
-                    onChange={(level) => this.setState({z: Number(level)})}/>
-            <svg id="canvas"
-                 viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
-                 width={canvasSize.width} height={canvasSize.height}
-                 style={{
-                    border: 'solid 1px black',
-                    transformOrigin: '0 0',
-                    width: '99%',
-                    height: 'auto'
-            }}>
-                <MapTiles def={def} params={this.state}/>
-                {_.range(utmGrid[0].x - GRID_STEP, utmGrid[1].x + GRID_STEP, GRID_STEP)
-                    .map(x => ({
-                        p1: utmToPx({x, y: utmGrid[0].y - GRID_STEP}),
-                        p2: utmToPx({x, y: utmGrid[2].y + GRID_STEP})
-                    }))
-                    .map((line, idx) => <GridLine key={idx} line={line}/>)
-                }
-                {_.range(utmGrid[0].y - GRID_STEP, utmGrid[2].y + GRID_STEP, GRID_STEP)
-                    .map(y => ({
-                        p1: utmToPx({x: utmGrid[0].x - GRID_STEP, y}),
-                        p2: utmToPx({x: utmGrid[2].x + GRID_STEP, y})
-                    }))
-                    .map((line, idx) => <GridLine key={idx} line={line}/>)
-                }
-            </svg>
+            <div>
+                <Select values={_.mapValues(LAYERS, v=>v.label)}
+                        value={this.state.source}
+                        onChange={(layer) => this.setState({source: layer})}/>
+                <Select values={LEVELS}
+                        value={String(this.state.z)}
+                        onChange={(level) => this.setState({z: Number(level)})}/>
+            </div>
+            <SVGMap def={def} params={this.state}/>
         </div>;
     }
 }
