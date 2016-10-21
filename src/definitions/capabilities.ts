@@ -1,4 +1,4 @@
-interface Dimentions {
+export interface Dimentions {
     width: number,
     height: number
 }

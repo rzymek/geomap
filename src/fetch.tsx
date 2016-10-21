@@ -47,17 +47,18 @@ function getParameters() {
         }
     };
 }
+export interface Box {
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number
+}
 
 export interface MapParams {
     source?: string,
     z?: number,
     title?: string,
-    box?: {
-        x1: number,
-        y1: number,
-        x2: number,
-        y2: number
-    }
+    box?: Box
 }
 class Fetch extends React.Component<{},MapParams> {
 

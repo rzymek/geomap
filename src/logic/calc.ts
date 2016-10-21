@@ -1,4 +1,5 @@
 import {Capabilities} from "../definitions/capabilities";
+import {SVGMap} from "../fetch/SVGMap";
 interface Def {
     source?: string,
     z?: number,
