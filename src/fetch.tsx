@@ -73,7 +73,7 @@ class Fetch extends React.Component<{},MapParams> {
         const def: any = LAYERS[this.state.source].def;
         const svg = <SVGMap def={def} params={this.state}/>;
         return <div>
-            <div>
+            <div className="no-print">
                 <Select values={_.mapValues(LAYERS, v=>v.label)}
                         value={this.state.source}
                         onChange={(layer) => this.setState({source: layer})}/>
