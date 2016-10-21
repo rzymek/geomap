@@ -7,6 +7,7 @@ import {setupProjections} from "./logic/proj4defs";
 import {orto} from "./capabilities/orto";
 import {topo} from "./capabilities/topo";
 import {SVGMap} from "./fetch/SVGMap";
+import {Capabilities} from "./definitions/capabilities";
 
 const LEVELS: {[zoom: number]: string} = _.chain({
     7: '1:50 000',
@@ -17,7 +18,7 @@ const LEVELS: {[zoom: number]: string} = _.chain({
     12: '1:10 000'
 }).mapValues((value, key) => `${key} - ${value}`).value();
 
-const LAYERS: {[key: string]: {label: string, def: {}}} = {
+const LAYERS: {[key: string]: {label: string, def: Capabilities}} = {
     topo: {
         label: 'Mapa topograficzna',
         def: topo
@@ -70,7 +71,7 @@ class Fetch extends React.Component<{},MapParams> {
     }
 
     render() {
-        const def: any = LAYERS[this.state.source].def;
+        const def: Capabilities = LAYERS[this.state.source].def;
         const svg = <SVGMap def={def} params={this.state}/>;
         return <div>
             <div className="no-print">

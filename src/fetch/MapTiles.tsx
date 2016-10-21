@@ -3,10 +3,11 @@ import * as _ from "lodash";
 import {CoordinatesXY} from "../logic/proj4defs";
 import {calc} from "../logic/calc";
 import {MapParams} from "../fetch";
+import {Capabilities} from "../definitions/capabilities";
 
 interface MapTilesProps{
     params: MapParams,
-    def: any
+    def: Capabilities
 }
 export class MapTiles extends React.Component<MapTilesProps,{}> {
     render() {

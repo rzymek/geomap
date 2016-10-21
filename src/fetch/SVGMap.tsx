@@ -6,6 +6,7 @@ import {calc} from "../logic/calc";
 import {GridLine} from "./GridLine";
 import {MapTiles} from "./MapTiles";
 import {MapParams} from "../fetch";
+import {Capabilities} from "../definitions/capabilities";
 
 
 function toKM(v: number) {
@@ -19,7 +20,7 @@ function pairToObj(arr: CoordinatesArray) {
 }
 interface SVGMapProps {
     params: MapParams
-    def: any
+    def: Capabilities
 }
 export class SVGMap extends React.Component<SVGMapProps,{}> {
     render() {

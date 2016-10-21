@@ -1,3 +1,4 @@
+import {Capabilities} from "../definitions/capabilities";
 interface Def {
     source?: string,
     z?: number,
@@ -9,11 +10,11 @@ interface Def {
         y2: number
     }
 }
-export function calc(def:Def, source:any) {
+export function calc(def:Def, source:Capabilities) {
     const {box} = def;
 
-    const scaleDenominators = source.tiles.EPSG_2180.map((it:any) => it.scaleDenominator);
-    const matrixSizes = source.tiles.EPSG_2180.map((it:any) => it.matrixSize);
+    const scaleDenominators = source.tiles.EPSG_2180.map(it => it.scaleDenominator);
+    const matrixSizes = source.tiles.EPSG_2180.map(it => it.matrixSize);
     const topLeftCorner = {
         y: 850000.0, //X
         x: 100000.0//Y
