@@ -8,6 +8,9 @@
     "rootDir": "src",
     "moduleResolution": "node"
   },
+  "types": [
+    "node"
+  ],
   "files": [
     "src/untyped.d.ts"
   ]

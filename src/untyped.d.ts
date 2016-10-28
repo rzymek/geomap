@@ -1,1 +1,1 @@
-declare const __filename: string;
+// declare const __filename: string;

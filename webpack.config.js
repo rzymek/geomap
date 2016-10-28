@@ -14,7 +14,7 @@ function htmlForChunk(name) {
     })
 }
 module.exports = {
-    entry: CHUNKS.reduce((dict, name) => (dict[name] = `./src/${name}.tsx`, dict), {}),
+    entry: CHUNKS.reduce((dict, name) => (dict[name] = `./src/${name}`, dict), {}),
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, "dist"),
@@ -45,7 +45,7 @@ module.exports = {
         }],
         preLoaders: [
             // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            { test: /\.js$/, loader: "source-map-loader" }
+            {test: /\.js$/, loader: "source-map-loader"}
         ]
     },
     // When importing a module whose path matches one of the following, just
