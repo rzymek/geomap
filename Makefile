@@ -2,10 +2,10 @@
 
 all: dist
 dev: node_modules
-	npm start
+	yarn start
 dist:  $(wildcard src/**/* webpack.config.js) node_modules
-	npm run build
+	yarn run build
 node_modules:
-	npm install
+	yarn install
 clean:
 	rm -rf dist
