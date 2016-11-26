@@ -17,6 +17,7 @@
     "@types/proj4": "2.3.2",
     "@types/react": "0.14.43",
     "@types/react-dom": "0.14.18",
+    "@types/openlayers": "^3.18.40",
     "chai": "3.5.0",
     "enzyme": "2.5.1",
     "html-webpack-plugin": "2.24.0",
@@ -39,6 +40,7 @@
   },
   "dependencies": {
     "lodash": "4.16.4",
+    "openlayers": "^3.19.1",
     "proj4": "^2.3.15",
     "react": "15.3.2",
     "react-dom": "15.3.2"
