@@ -20,6 +20,16 @@ function pairToObj(arr: CoordinatesArray) {
     }
 }
 
+function angleDeg(p1: CoordinatesXY, p2: CoordinatesXY): number {
+    return Math.atan2(p2.y - p1.y, p2.x - p1.x) * 180 / Math.PI;
+}
+
+function toXY(coord: CoordinatesArray): CoordinatesXY {
+    return {
+        x: coord[0],
+        y: coord[1]
+    }
+}
 export class MapGrid extends React.Component<MapGridProps,{}> {
     render() {
         const {step = 1000, box, canvasSize} = this.props;
@@ -46,6 +56,12 @@ export class MapGrid extends React.Component<MapGridProps,{}> {
         function utmToPx(coord: CoordinatesXY): CoordinatesXY {
             return puwgToPx(utm2puwg(zone, coord));
         }
+
+        console.log(utmGrid,
+            utmToPx(pairToObj(puwg2utm(zone, puwg[0]))),
+            utmToPx(pairToObj(puwg2utm(zone, puwg[1])))
+        );
+        // const angle = [utmToPx(utmGrid[0]), utmToPx(utmGrid[1])];
 
         const verticalLines = _.range(utmGrid[0].x - step, utmGrid[1].x + step, step)
             .map(x => ({

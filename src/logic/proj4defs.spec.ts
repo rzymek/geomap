@@ -4,6 +4,8 @@ import {setupProjections} from "./proj4defs";
 import * as proj4 from "proj4";
 import * as _ from "lodash";
 
+declare var __filename:string;
+
 describe(__filename, function () {
     setupProjections();
     it('pugw', function () {
