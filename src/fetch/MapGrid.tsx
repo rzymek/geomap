@@ -3,6 +3,7 @@ import {CoordinatesXY, CoordinatesArray, utmZone, puwg2ll, puwg2utm, utm2puwg} f
 import {GridLine} from "./GridLine";
 import {Box} from "../fetch";
 import {Dimentions} from "../definitions/capabilities";
+import * as _ from "lodash";
 
 interface MapGridProps {
     step?: number,

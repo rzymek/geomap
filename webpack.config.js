@@ -20,41 +20,15 @@ module.exports = {
         path: path.resolve(__dirname, "dist"),
     },
     resolve: {
-        // root: ['src', 'node_modules'].map(function (dir) {
-        //     return path.resolve(__dirname, dir)
-        // }),
-        extensions: ['', '.js', '.d.ts', '.ts', '.tsx']
+        extensions: ['.js', '.ts', '.tsx']
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
-        new webpack.optimize.OccurenceOrderPlugin(),
-        // new webpack.optimize.UglifyJsPlugin({
-        //     compressor: {
-        //         warnings: false
-        //     }
-        // }),
         ...CHUNKS.map(name => htmlForChunk(name))
     ],
     module: {
-        noParse: /[/]proj4.js$/,
-        loaders: [{
-            test: /\.tsx?$/,
-            loaders: ['ts-loader']
-
-            // ,include: path.join(__dirname, 'src')
-        }],
-        preLoaders: [
-            // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
-            {test: /\.js$/, loader: "source-map-loader"}
+        loaders: [
+            { test: /\.tsx?$/, loaders: ['ts-loader'] }
         ]
-    },
-    // When importing a module whose path matches one of the following, just
-    // assume a corresponding global variable exists and use that instead.
-    // This is important because it allows us to avoid bundling all of our
-    // dependencies, which allows browsers to cache those libraries between builds.
-    externals: {
-        "lodash": "_",
-        "react": "React",
-        "react-dom": "ReactDOM"
     }
 };

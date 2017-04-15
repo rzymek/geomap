@@ -59,7 +59,7 @@ export class MapTiles extends React.Component<MapTilesProps,{}> {
                 url: pos.url
             })).map(it =>
                 <image key={it.url}
-                       href={it.url}
+                       xlinkHref={it.url}
                        x={it.x}
                        y={it.y}
                        width={it.width}

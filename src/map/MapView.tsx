@@ -1,5 +1,7 @@
 import * as React from "react";
 import * as ol from "openlayers";
+import * as _ from "lodash";
+
 interface MapProps {
 }
 
@@ -8,7 +10,7 @@ interface Sources {
 }
 
 function createSources(): Sources {
-    return Object.assign({
+    return _.assign({
         'OpenStreetMap': new ol.source.OSM(),
         'OpenCycleMap': new ol.source.XYZ({
             url: 'http://tile.opencyclemap.org/cycle/{z}/{x}/{y}.png'
@@ -29,7 +31,7 @@ function createSources(): Sources {
      ['MapQuest: ' + style]: new ol.source.MapQuest({
      layer: style
      })
-     }))*/);
+     }))*/) as Sources;
 }
 
 function createLayers(sources: Sources, selectionLayer: ol.source.Vector) {
