@@ -4,6 +4,7 @@ import { CoordinatesXY } from "../logic/proj4defs";
 interface LabelProps {
     position: CoordinatesXY,
     value: string,
+    fontSize?: number
     rotate?: number
 }
 interface LabelState {
@@ -38,11 +39,12 @@ export class Label extends React.Component<LabelProps, LabelState> {
     }
     render() {
         const { x, y } = this.props.position;
+        const { fontSize = 25 } = this.props;
         const { bbox } = this.state;
         const style = {
             textAnchor: 'middle',
             textAlign: 'center',
-            fontSize: 25,
+            fontSize,
         };
         return <g>
             <rect fill="white"

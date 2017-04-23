@@ -13,6 +13,16 @@ interface MapGridProps {
     canvasSize: Dimentions
 }
 
+interface LabeledLine {
+    p1: CoordinatesXY,
+    p2: CoordinatesXY,
+    label: string
+}
+interface LabelDefinition {
+    position: CoordinatesXY,
+    label: string,
+    rotation?: number
+}
 function toKM(v: number) {
     return Math.round(v / 1000) * 1000;
 }
@@ -34,6 +44,52 @@ function toXY(coord: CoordinatesArray): CoordinatesXY {
     }
 }
 export class MapGrid extends React.Component<MapGridProps, {}> {
+    private getCorners() {
+        const { canvasSize } = this.props;
+        return {
+            topLeft: { x: 0, y: 0 },
+            topRight: { x: canvasSize.width, y: 0 },
+            bottomRight: { x: canvasSize.width, y: canvasSize.height },
+            bottomLeft: { x: 0, y: canvasSize.height }
+        }
+    }
+    private getTopLabels(verticalLines: LabeledLine[]): LabelDefinition[] {
+        const corners = this.getCorners();
+        return verticalLines.map(line => ({
+            intersection: lineIntersecion(
+                { p1: corners.topLeft, p2: corners.topRight },
+                line
+            ),
+            label: line.label
+        }))
+            .filter(v => v.intersection !== undefined)
+            .map(v => ({
+                position: {
+                    x: v.intersection.x,
+                    y: 16,
+                },
+                label: v.label
+            }))
+    }
+    private getLeftLabels(horizontalLines: LabeledLine[]): LabelDefinition[] {
+        const corners = this.getCorners();
+        return horizontalLines.map(line => ({
+            intersection: lineIntersecion(
+                { p1: corners.topLeft, p2: corners.bottomLeft },
+                line
+            ),
+            label: line.label
+        }))
+            .filter(v => v.intersection !== undefined)
+            .map(v => ({
+                position: {
+                    x: 16,
+                    y: v.intersection.y,
+                },
+                label: v.label,
+                rotation: 90
+            }));
+    }
     render() {
         const { step = 1000, box, canvasSize } = this.props;
         const zone = utmZone(puwg2ll([box.x1, box.y1]));
@@ -60,64 +116,40 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             return puwgToPx(utm2puwg(zone, coord));
         }
 
-        console.log(utmGrid,
-            utmToPx(pairToObj(puwg2utm(zone, puwg[0]))),
-            utmToPx(pairToObj(puwg2utm(zone, puwg[1])))
-        );
         // const angle = [utmToPx(utmGrid[0]), utmToPx(utmGrid[1])];
 
-        const verticalLines = _.range(utmGrid[0].x - step, utmGrid[1].x + step, step)
+        const verticalLines: LabeledLine[] = _.range(utmGrid[0].x - step, utmGrid[1].x + step, step)
             .map(x => ({
                 p1: utmToPx({ x, y: utmGrid[0].y - step }),
-                p2: utmToPx({ x, y: utmGrid[2].y + step })
-            }))
-            .map((line, idx) => <GridLine key={idx} line={line} />);
-        const horizontalLines = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
-            .map(y => ({
-                p1: utmToPx({ x: utmGrid[0].x - step, y }),
-                p2: utmToPx({ x: utmGrid[2].x + step, y })
-            }))
-            .map((line, idx) => <GridLine key={idx} line={line} />);
-        const corners = {
-            topLeft: { x: 0, y: 0 },
-            topRight: { x: canvasSize.width, y: 0 },
-            bottomRight: { x: canvasSize.width, y: canvasSize.height },
-            bottomLeft: { x: 0, y: canvasSize.height }
-        };
-        const horizontalLabels = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
+                p2: utmToPx({ x, y: utmGrid[2].y + step }),
+                label: _.toString(x)
+            }));
+        const horizontalLines: LabeledLine[] = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
             .map(y => ({
                 p1: utmToPx({ x: utmGrid[0].x - step, y }),
                 p2: utmToPx({ x: utmGrid[2].x + step, y }),
                 label: _.toString(y)
-            }))
-            .map(line => {
-                const intersection = lineIntersecion(
-                    { p1: corners.topLeft, p2: corners.bottomLeft },
-                    line
-                );
-                console.log({ p1: corners.topLeft, p2: corners.bottomLeft },
-                    line, intersection);
-                if (intersection === undefined) {
-                    return undefined
-                } else {
-                    return ({
-                        x: 16,
-                        y: intersection.y,
-                        label: line.label
-                    })
-                }
-            })
-            .filter(v => v !== undefined)
-            .map((line, idx) =>
-                <Label key={idx}
-                    position={line}
-                    value={line.label}
-                    rotate={90}
-                />);
+            }));
         return <g>
-            {verticalLines}
-            {horizontalLines}
-            {horizontalLabels}
+            <g id="grid-lines">
+                {_.concat(
+                    verticalLines,
+                    horizontalLines
+                ).map(line =>
+                    <GridLine key={line.label} line={line} />
+                    )}
+            </g>
+            <g id="grid-labels">
+                {_.concat(
+                    this.getLeftLabels(horizontalLines),
+                    this.getTopLabels(verticalLines)
+                ).map((value, idx) =>
+                    <Label key={idx}
+                        position={value.position}
+                        value={value.label}
+                        rotate={value.rotation}
+                    />)}
+            </g>
         </g>
     }
 }
