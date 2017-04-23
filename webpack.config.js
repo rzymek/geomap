@@ -14,6 +14,7 @@ function htmlForChunk(name) {
     })
 }
 module.exports = {
+    devtool: 'cheap-source-map',
     entry: CHUNKS.reduce((dict, name) => (dict[name] = `./src/${name}`, dict), {}),
     output: {
         filename: '[name].js',

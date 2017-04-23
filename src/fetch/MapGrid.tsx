@@ -1,9 +1,11 @@
 import * as React from "react";
-import {CoordinatesXY, CoordinatesArray, utmZone, puwg2ll, puwg2utm, utm2puwg} from "../logic/proj4defs";
-import {GridLine} from "./GridLine";
-import {Box} from "../fetch";
-import {Dimentions} from "../definitions/capabilities";
+import { CoordinatesXY, CoordinatesArray, utmZone, puwg2ll, puwg2utm, utm2puwg } from "../logic/proj4defs";
+import { GridLine } from "./GridLine";
+import { Label } from "./Label";
+import { Box } from "../fetch";
+import { Dimentions } from "../definitions/capabilities";
 import * as _ from "lodash";
+import { linear } from '../logic/linear';
 
 interface MapGridProps {
     step?: number,
@@ -31,9 +33,9 @@ function toXY(coord: CoordinatesArray): CoordinatesXY {
         y: coord[1]
     }
 }
-export class MapGrid extends React.Component<MapGridProps,{}> {
+export class MapGrid extends React.Component<MapGridProps, {}> {
     render() {
-        const {step = 1000, box, canvasSize} = this.props;
+        const { step = 1000, box, canvasSize } = this.props;
         const zone = utmZone(puwg2ll([box.x1, box.y1]));
         const puwg: CoordinatesArray[] = [
             [box.x1, box.y1],
@@ -66,19 +68,46 @@ export class MapGrid extends React.Component<MapGridProps,{}> {
 
         const verticalLines = _.range(utmGrid[0].x - step, utmGrid[1].x + step, step)
             .map(x => ({
-                p1: utmToPx({x, y: utmGrid[0].y - step}),
-                p2: utmToPx({x, y: utmGrid[2].y + step})
+                p1: utmToPx({ x, y: utmGrid[0].y - step }),
+                p2: utmToPx({ x, y: utmGrid[2].y + step })
             }))
-            .map((line, idx) => <GridLine key={idx} line={line}/>);
+            .map((line, idx) => <GridLine key={idx} line={line} />);
         const horizontalLines = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
             .map(y => ({
-                p1: utmToPx({x: utmGrid[0].x - step, y}),
-                p2: utmToPx({x: utmGrid[2].x + step, y})
+                p1: utmToPx({ x: utmGrid[0].x - step, y }),
+                p2: utmToPx({ x: utmGrid[2].x + step, y })
             }))
-            .map((line, idx) => <GridLine key={idx} line={line}/>);
+            .map((line, idx) => <GridLine key={idx} line={line} />);
+        const corners = {
+            topLeft: { x: 0, y: 0 },
+            topRight: { x: canvasSize.width, y: 0 },
+            bottomRight: { x: canvasSize.width, y: canvasSize.height },
+            bottomLeft: { x: 0, y: canvasSize.height }
+        };
+        const horizontalLabels = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
+            .map(y => ({
+                p1: utmToPx({ x: utmGrid[0].x - step, y }),
+                p2: utmToPx({ x: utmGrid[2].x + step, y }),
+                label: _.toString(y)
+            }))
+            .map(line => {
+                const intersection = linear.getIntersect(corners.topLeft, corners.bottomLeft, line.p1, line.p2);
+                return ({
+                    x: 16,
+                    y: intersection.y,
+                    label: line.label
+                })
+            })
+            .map((line, idx) =>
+                <Label key={idx}
+                    position={line}
+                    value={line.label}
+                    rotate={90}
+                />);
         return <g>
             {verticalLines}
             {horizontalLines}
+            {horizontalLabels}
         </g>
     }
 }
