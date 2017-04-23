@@ -1,10 +1,11 @@
 import * as React from "react";
 import { CoordinatesXY } from "../logic/proj4defs";
+import * as _ from "lodash";
 
 interface LabelProps {
     position: CoordinatesXY,
     value: string,
-    fontSize?: number
+    fontSize: number | string
     rotate?: number
 }
 interface LabelState {
@@ -26,27 +27,44 @@ export class Label extends React.Component<LabelProps, LabelState> {
         if (rotate === undefined || bbox.x === undefined) {
             return undefined;
         }
-        return `rotate(
-            ${rotate} 
-            ${(bbox.x + bbox.width / 2)} 
-            ${(bbox.y + bbox.height / 2)}
-        )`;
+        const x = bbox.x + bbox.width / 2;
+        const y = bbox.y + bbox.height / 2;
+        return `rotate(${rotate} ${x} ${y})`;
     }
-    componentDidMount() {
+    componentDidUpdate() {
+        if (this.state.bbox.x !== undefined) {
+            return;
+        }
         this.setState({
             bbox: this.textRef.getBBox()
         })
     }
-    render() {
-        const { x, y } = this.props.position;
-        const { fontSize = 25 } = this.props;
+    componentWillReceiveProps() {
+        this.setState({
+            bbox: {} as SVGRect
+        })
+    }
+    private getTranslate() {
         const { bbox } = this.state;
+        const { x, y } = this.props.position;
+        const undefinedToBBox = v => v === undefined ? bbox.height : 0;
+        const tx = undefinedToBBox(x)
+        const ty = undefinedToBBox(y);
+        if(_.some([tx,ty], _.isUndefined) || _.every([tx,ty], v => v === 0)) {
+            return undefined;
+        }
+        return `translate(${tx}, ${ty})`
+    }
+    render() {
+        const { bbox } = this.state;
+        const { x = 0, y = 0 } = this.props.position;
+        const { fontSize } = this.props;
         const style = {
             textAnchor: 'middle',
             textAlign: 'center',
             fontSize,
         };
-        return <g>
+        return <g transform={this.getTranslate()}>
             <rect fill="white"
                 transform={this.getTranform()}
                 x={bbox.x} y={bbox.y}

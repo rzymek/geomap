@@ -10,7 +10,10 @@ import { lineIntersecion } from "../logic/lineIntersection";
 interface MapGridProps {
     step?: number,
     box: Box,
-    canvasSize: Dimentions
+    canvasSize: Dimentions,
+    params: {
+        fontSize: number
+    }
 }
 
 interface LabeledLine {
@@ -66,7 +69,7 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             .map(v => ({
                 position: {
                     x: v.intersection.x,
-                    y: 16,
+                    y: undefined,
                 },
                 label: v.label
             }))
@@ -83,11 +86,11 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             .filter(v => v.intersection !== undefined)
             .map(v => ({
                 position: {
-                    x: 16,
+                    x: undefined,
                     y: v.intersection.y,
                 },
                 label: v.label,
-                rotation: 90
+                rotation: -90
             }));
     }
     render() {
@@ -145,9 +148,10 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                     this.getTopLabels(verticalLines)
                 ).map((value, idx) =>
                     <Label key={idx}
-                        position={value.position}
-                        value={value.label}
-                        rotate={value.rotation}
+                           fontSize={this.props.params.fontSize}
+                           position={value.position}
+                           value={value.label}
+                           rotate={value.rotation}
                     />)}
             </g>
         </g>

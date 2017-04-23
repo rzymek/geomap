@@ -18,6 +18,8 @@ const LEVELS: {[zoom: number]: string} = _.chain({
     12: '1:10 000'
 }).mapValues((value, key) => `${key} - ${value}`).value();
 
+const DEFAULT_FONT_SIZE = 16;
+
 const LAYERS: {[key: string]: {label: string, def: Capabilities}} = {
     topo: {
         label: 'Mapa topograficzna',
@@ -44,7 +46,8 @@ function getParameters() {
             y1: Number(query[4]),
             x2: Number(query[5]),
             y2: Number(query[6])
-        }
+        },
+        fontSize: Number(query[7] || DEFAULT_FONT_SIZE) 
     };
 }
 export interface Box {
@@ -58,7 +61,8 @@ export interface MapParams {
     source?: string,
     z?: number,
     title?: string,
-    box?: Box
+    box?: Box,
+    fontSize: number
 }
 class Fetch extends React.Component<{},MapParams> {
 
@@ -82,6 +86,12 @@ class Fetch extends React.Component<{},MapParams> {
                 <Select values={LEVELS}
                         value={String(this.state.z)}
                         onChange={(level) => this.setState({z: Number(level)})}/>
+                <input type="number" 
+                       style={{width: 50}}
+                       title="Rozmiar czcionki"
+                       value={this.state.fontSize}
+                       onChange={e => this.setState({fontSize: _.toNumber((e as any).target.value)})}/>
+
                 <a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} download={`${this.state.title}.svg`}>SVG</a>
             </div>
             {svg}
