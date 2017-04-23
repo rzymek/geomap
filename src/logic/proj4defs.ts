@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import * as proj4js from 'proj4';
 const proj4 = (proj4js as any).default;
 
@@ -17,26 +18,45 @@ export type Coordinates = CoordinatesXY | CoordinatesArray;
  * @param {number[2]} puwg
  */
 export function puwg2ll(puwg: CoordinatesArray): CoordinatesArray {
-    return proj4("PUWG92", "WGS84").forward(puwg);
+    return proj4cache.get("PUWG92", "WGS84").forward(puwg);
 }
 export function utmZone(latLon: CoordinatesArray): number {
     return 1 + Math.floor((latLon[0] + 180) / 6);
 }
+
+const proj4cache = new class Proj4Cache {
+    private cache = {};
+    public get(proj1: string, proj2: string) {
+        const cachePath = [proj1, proj2];
+        const cached = _.get(this.cache, cachePath);
+        if (cached === undefined) {
+            console.log(`new proj4 [${proj1}]->[${proj2}]`);
+            const fresh = proj4(proj1, proj2);
+            _.set(this.cache, cachePath, fresh);
+            return fresh;
+        } else {
+            return cached;
+        }
+    }
+};
+
+
 /**
  * @param {number[2]} latLon
  */
 export function ll2utm(zone: number, latLon: Coordinates): Coordinates {
-    return proj4("WGS84", "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs").forward(latLon);
+    return proj4cache.get("WGS84", "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+        .forward(_.clone(latLon));
 }
 export function utm2ll(zone: number, utm: Coordinates): Coordinates {
-    return proj4("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", "WGS84").forward(utm);
+    return proj4cache.get("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", "WGS84")
+        .forward(_.clone(utm));
 }
 export function utm2puwg(zone: number, utm: CoordinatesXY): CoordinatesXY {
-    return proj4(
-        "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", "PUWG92",
-        utm
-    ) as any as CoordinatesXY;
+    return proj4cache.get("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", "PUWG92")
+        .forward(_.clone(utm));
 }
 export function puwg2utm(zone: number, puwg: CoordinatesArray): CoordinatesArray {
-    return proj4("PUWG92", "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs").forward(puwg);
+    return proj4cache.get("PUWG92", "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+        .forward(_.clone(puwg));
 }
