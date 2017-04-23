@@ -5,7 +5,7 @@ import { Label } from "./Label";
 import { Box } from "../fetch";
 import { Dimentions } from "../definitions/capabilities";
 import * as _ from "lodash";
-import { linear } from '../logic/linear';
+import { lineIntersecion } from "../logic/lineIntersection";
 
 interface MapGridProps {
     step?: number,
@@ -91,13 +91,23 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                 label: _.toString(y)
             }))
             .map(line => {
-                const intersection = linear.getIntersect(corners.topLeft, corners.bottomLeft, line.p1, line.p2);
-                return ({
-                    x: 16,
-                    y: intersection.y,
-                    label: line.label
-                })
+                const intersection = lineIntersecion(
+                    { p1: corners.topLeft, p2: corners.bottomLeft },
+                    line
+                );
+                console.log({ p1: corners.topLeft, p2: corners.bottomLeft },
+                    line, intersection);
+                if (intersection === undefined) {
+                    return undefined
+                } else {
+                    return ({
+                        x: 16,
+                        y: intersection.y,
+                        label: line.label
+                    })
+                }
             })
+            .filter(v => v !== undefined)
             .map((line, idx) =>
                 <Label key={idx}
                     position={line}

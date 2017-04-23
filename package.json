@@ -27,6 +27,7 @@
     "webpack-dev-server": "^2.4.3"
   },
   "dependencies": {
+    "line-intersect": "^1.0.0",
     "lodash": "^4.17.4",
     "openlayers": "^4.1.0",
     "proj4": "^2.4.3",
