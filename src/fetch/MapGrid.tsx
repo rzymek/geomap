@@ -12,7 +12,8 @@ interface MapGridProps {
     box: Box,
     canvasSize: Dimentions,
     params: {
-        fontSize: number
+        fontSize: number,
+        gridLineWidth: number
     }
 }
 
@@ -139,8 +140,10 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                     verticalLines,
                     horizontalLines
                 ).map(line =>
-                    <GridLine key={line.label} line={line} />
-                    )}
+                    <GridLine key={line.label} 
+                              strokeWidth={this.props.params.gridLineWidth}
+                              line={line} />
+                )}
             </g>
             <g id="grid-labels">
                 {_.concat(

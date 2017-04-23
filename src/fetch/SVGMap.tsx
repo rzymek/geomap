@@ -34,9 +34,7 @@ export class SVGMap extends React.Component<SVGMapProps,{}> {
             height: 'auto'
         }}>
             <MapTiles def={def} params={params}/>
-            <MapGrid box={box} canvasSize={canvasSize} params={{
-                fontSize: params.fontSize
-            }}/>
+            <MapGrid box={box} canvasSize={canvasSize} params={params}/>
         </svg>;
     }
 }

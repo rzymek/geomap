@@ -19,6 +19,7 @@ const LEVELS: {[zoom: number]: string} = _.chain({
 }).mapValues((value, key) => `${key} - ${value}`).value();
 
 const DEFAULT_FONT_SIZE = 16;
+const DEFAULT_GRID_LINE_WIDTH = 1;
 
 const LAYERS: {[key: string]: {label: string, def: Capabilities}} = {
     topo: {
@@ -47,7 +48,8 @@ function getParameters() {
             x2: Number(query[5]),
             y2: Number(query[6])
         },
-        fontSize: Number(query[7] || DEFAULT_FONT_SIZE) 
+        fontSize: Number(query[7] || DEFAULT_FONT_SIZE),
+        gridLineWidth: Number(query[8] || DEFAULT_GRID_LINE_WIDTH),
     };
 }
 export interface Box {
@@ -62,7 +64,8 @@ export interface MapParams {
     z?: number,
     title?: string,
     box?: Box,
-    fontSize: number
+    fontSize: number,
+    gridLineWidth: number
 }
 class Fetch extends React.Component<{},MapParams> {
 
@@ -87,10 +90,18 @@ class Fetch extends React.Component<{},MapParams> {
                         value={String(this.state.z)}
                         onChange={(level) => this.setState({z: Number(level)})}/>
                 <input type="number" 
+                       min={0}
                        style={{width: 50}}
                        title="Rozmiar czcionki"
                        value={this.state.fontSize}
                        onChange={e => this.setState({fontSize: _.toNumber((e as any).target.value)})}/>
+                <input type="number" 
+                       min={0}
+                       style={{width: 50}}
+                       step="0.2"
+                       title="Grubość linii"
+                       value={this.state.gridLineWidth}
+                       onChange={e => this.setState({gridLineWidth: _.toNumber((e as any).target.value)})}/>
 
                 <a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} download={`${this.state.title}.svg`}>SVG</a>
             </div>
