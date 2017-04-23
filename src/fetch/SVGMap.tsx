@@ -1,21 +1,21 @@
 import * as React from "react";
-import {calc} from "../logic/calc";
-import {MapTiles} from "./MapTiles";
-import {MapParams} from "../fetch";
-import {MapGrid} from "./MapGrid";
-import {Capabilities} from "../definitions/capabilities";
+import { calc } from "../logic/calc";
+import { MapTiles } from "./MapTiles";
+import { MapParams } from "../fetch";
+import { MapGrid } from "./MapGrid";
+import { Capabilities } from "../definitions/capabilities";
 
 interface SVGMapProps {
     params: MapParams
     def: Capabilities
 }
-export class SVGMap extends React.Component<SVGMapProps,{}> {
+export class SVGMap extends React.Component<SVGMapProps, {}> {
     render() {
-        const {params} = this.props;
-        const {def} = this.props;
-        const {box} = params;
+        const { params } = this.props;
+        const { def } = this.props;
+        const { box } = params;
 
-        const {tileExact, tileSize} = calc(
+        const { tileExact, tileSize } = calc(
             params,
             def
         );
@@ -25,16 +25,20 @@ export class SVGMap extends React.Component<SVGMapProps,{}> {
         };
 
         return <svg id="canvas"
-                    viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
-                    width={canvasSize.width} height={canvasSize.height}
-                    style={{
-            border: 'solid 1px black',
-            transformOrigin: '0 0',
-            width: '99%',
-            height: 'auto'
-        }}>
-            <MapTiles def={def} params={params}/>
-            <MapGrid box={box} canvasSize={canvasSize} params={params}/>
+            viewBox={`0 0 ${canvasSize.width} ${canvasSize.height}`}
+            width={canvasSize.width} height={canvasSize.height}
+            style={{
+                border: 'solid 1px black',
+                transformOrigin: '0 0',
+                width: '99%',
+                height: 'auto'
+            }}>
+            <MapGrid box={box} canvasSize={canvasSize} params={{
+                fontSize: this.props.params.fontSize,
+                gridLineWidth: this.props.params.gridLineWidth
+            }}>
+                <MapTiles def={def} params={params} />
+            </MapGrid>
         </svg>;
     }
 }

@@ -94,6 +94,26 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                 rotation: -90
             }));
     }
+    private getGridRotation(utmGrid: CoordinatesXY[]): string {
+        const angle = angleDeg(
+            this.utmToPx(utmGrid[0]),
+            this.utmToPx(utmGrid[1])
+        );
+        return `rotate(${-angle})`
+    }
+    private utmToPx(coord: CoordinatesXY): CoordinatesXY {
+        const { box, canvasSize } = this.props;
+        const zone = utmZone(puwg2ll([box.x1, box.y1]));
+        return this.puwgToPx(utm2puwg(zone, coord));
+    }
+
+    private puwgToPx(coord: CoordinatesXY): CoordinatesXY {
+        const { box, canvasSize } = this.props;
+        return {
+            x: (coord.x - box.x1) / (box.x2 - box.x1) * canvasSize.width,
+            y: (coord.y - box.y2) / (box.y1 - box.y2) * canvasSize.height
+        }
+    }
     render() {
         const { step = 1000, box, canvasSize } = this.props;
         const zone = utmZone(puwg2ll([box.x1, box.y1]));
@@ -109,41 +129,32 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             .map(c => c.map(toKM))
             .map(pairToObj);
 
-        function puwgToPx(coord: CoordinatesXY): CoordinatesXY {
-            return {
-                x: (coord.x - box.x1) / (box.x2 - box.x1) * canvasSize.width,
-                y: (coord.y - box.y2) / (box.y1 - box.y2) * canvasSize.height
-            }
-        }
-
-        function utmToPx(coord: CoordinatesXY): CoordinatesXY {
-            return puwgToPx(utm2puwg(zone, coord));
-        }
-
-        // const angle = [utmToPx(utmGrid[0]), utmToPx(utmGrid[1])];
-
         const verticalLines: LabeledLine[] = _.range(utmGrid[0].x - step, utmGrid[1].x + step, step)
             .map(x => ({
-                p1: utmToPx({ x, y: utmGrid[0].y - step }),
-                p2: utmToPx({ x, y: utmGrid[2].y + step }),
+                p1: this.utmToPx({ x, y: utmGrid[0].y - step }),
+                p2: this.utmToPx({ x, y: utmGrid[2].y + step }),
                 label: _.toString(x)
             }));
         const horizontalLines: LabeledLine[] = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
             .map(y => ({
-                p1: utmToPx({ x: utmGrid[0].x - step, y }),
-                p2: utmToPx({ x: utmGrid[2].x + step, y }),
+                p1: this.utmToPx({ x: utmGrid[0].x - step, y }),
+                p2: this.utmToPx({ x: utmGrid[2].x + step, y }),
                 label: _.toString(y)
             }));
+
         return <g>
-            <g id="grid-lines">
-                {_.concat(
-                    verticalLines,
-                    horizontalLines
-                ).map(line =>
-                    <GridLine key={line.label} 
-                              strokeWidth={this.props.params.gridLineWidth}
-                              line={line} />
-                )}
+            <g transform={this.getGridRotation(utmGrid)}>
+                {this.props.children}
+                <g id="grid-lines" >
+                    {_.concat(
+                        verticalLines,
+                        horizontalLines
+                    ).map(line =>
+                        <GridLine key={line.label}
+                            strokeWidth={this.props.params.gridLineWidth}
+                            line={line} />
+                        )}
+                </g>
             </g>
             <g id="grid-labels">
                 {_.concat(
@@ -151,10 +162,10 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                     this.getTopLabels(verticalLines)
                 ).map((value, idx) =>
                     <Label key={idx}
-                           fontSize={this.props.params.fontSize}
-                           position={value.position}
-                           value={value.label}
-                           rotate={value.rotation}
+                        fontSize={this.props.params.fontSize}
+                        position={value.position}
+                        value={value.label}
+                        rotate={value.rotation}
                     />)}
             </g>
         </g>
