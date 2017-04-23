@@ -40,8 +40,8 @@ const parameterMapping = [
     { name: 'box.y1', map: Number },
     { name: 'box.x2', map: Number },
     { name: 'box.y2', map: Number },
-    { name: 'fontSize', map: v => Number(_.defaultTo(v, DEFAULT_FONT_SIZE)) },
-    { name: 'gridLineWidth', map: v => Number(_.defaultTo(v, DEFAULT_GRID_LINE_WIDTH)) },
+    { name: 'fontSize', map: (v:any) => Number(_.defaultTo(v, DEFAULT_FONT_SIZE)) },
+    { name: 'gridLineWidth', map: (v:any) => Number(_.defaultTo(v, DEFAULT_GRID_LINE_WIDTH)) },
 ];
 
 function getParameters(): MapParams {

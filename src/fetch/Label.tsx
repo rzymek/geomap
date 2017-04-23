@@ -47,7 +47,7 @@ export class Label extends React.Component<LabelProps, LabelState> {
     private getTranslate() {
         const { bbox } = this.state;
         const { x, y } = this.props.position;
-        const undefinedToBBox = v => v === undefined ? bbox.height : 0;
+        const undefinedToBBox = (v:number) => v === undefined ? bbox.height : 0;
         const tx = undefinedToBBox(x)
         const ty = undefinedToBBox(y);
         if(_.some([tx,ty], _.isUndefined) || _.every([tx,ty], v => v === 0)) {
