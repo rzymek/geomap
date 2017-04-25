@@ -106,17 +106,36 @@ export class MapView extends React.Component<MapProps, {}> {
             })
         });
         layers[0].setVisible(true);
-        console.log(map);
+        map.on('click', (event: ol.MapBrowserEvent) => {
+            const feature = map.forEachFeatureAtPixel(event.pixel, _.identity);
+            if (feature) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            console.log(feature);
+        });
+        map.addInteraction(new ol.interaction.Draw({
+            source: selectionLayer,
+            type: 'Circle',
+            geometryFunction(coordinates, geometry: ol.geom.SimpleGeometry) {
+                if(geometry){
+                    selectionLayer.clear();
+                }
+                const createBox = (ol.interaction.Draw as any/*missing typing*/).createBox();
+                const box:ol.geom.Polygon = createBox(coordinates, geometry);
+                return box;
+            }
+        }));
     }
 
     render() {
         return <div id="map" style={{
-                position:'absolute',
-                top:0,
-                left:0,
-                right:0,
-                bottom:0,
-                zIndex: 0
-            }}></div>
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 0
+        }}></div>
     }
 }

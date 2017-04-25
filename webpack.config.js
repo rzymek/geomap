@@ -21,7 +21,11 @@ module.exports = {
         path: path.resolve(__dirname, "dist"),
     },
     resolve: {
-        extensions: ['.js', '.ts', '.tsx']
+        extensions: ['.js', '.ts', '.tsx'],
+        alias: {
+            "openlayers/css/ol.css": __dirname + "/node_modules/openlayers/dist/ol-debug.css",
+            "openlayers": __dirname + "/node_modules/openlayers/dist/ol-debug.js",
+        }
     },
     plugins: [
         new webpack.HotModuleReplacementPlugin(),

@@ -19,6 +19,6 @@ declare module "line-intersect" {
         x3: number, y3: number,
         x4: number, y4: number): {
             type: string,
-            point: {x:number, y:number}
+            point: { x: number, y: number }
         };
 }
