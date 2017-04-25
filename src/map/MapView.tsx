@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ol from "openlayers";
 import * as _ from "lodash";
+import "openlayers/css/ol.css"
 
 interface MapProps {
 }

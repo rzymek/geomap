@@ -17,10 +17,12 @@
     "@types/proj4": "^2.3.4",
     "@types/react": "^15.0.21",
     "@types/react-dom": "^0.14.23",
+    "css-loader": "^0.28.0",
     "html-webpack-plugin": "^2.28.0",
     "jest": "^19.0.2",
     "react-addons-test-utils": "^15.5.1",
     "source-map-loader": "^0.2.1",
+    "style-loader": "^0.16.1",
     "ts-loader": "^2.0.3",
     "typescript": "^2.2.2",
     "webpack": "^2.4.1",
@@ -29,7 +31,7 @@
   "dependencies": {
     "line-intersect": "^1.0.0",
     "lodash": "^4.17.4",
-    "openlayers": "^4.1.0",
+    "openlayers": "3.20.1",
     "proj4": "^2.4.3",
     "react": "^15.5.4",
     "react-dom": "^15.5.4"

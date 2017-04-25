@@ -28,8 +28,9 @@ module.exports = {
         ...CHUNKS.map(name => htmlForChunk(name))
     ],
     module: {
-        loaders: [
-            { test: /\.tsx?$/, loader: 'ts-loader' }
+        rules: [
+            { test: /\.tsx?$/, use: 'ts-loader' },
+            { test: /\.css$/, use: ['style-loader', 'css-loader'] }
         ]
     }
 };
