@@ -2,35 +2,12 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as ReactDOMServer from "react-dom/server";
 import * as _ from "lodash";
-import { Select } from "./components/Select";
+import { LayerSelector } from "./components/LayerSelector";
+import { LAYERS } from "./logic/layers";
 import { setupProjections } from "./logic/proj4defs";
-import { orto } from "./capabilities/orto";
-import { topo } from "./capabilities/topo";
 import { SVGMap } from "./fetch/SVGMap";
-import { Capabilities } from "./definitions/capabilities";
-
-const LEVELS: { [zoom: number]: string } = _.chain({
-    7: '1:50 000',
-    8: '1:25 000',
-    9: '1:10 000',
-    10: '1:10 000',
-    11: '1:10 000',
-    12: '1:10 000'
-}).mapValues((value, key) => `${key} - ${value}`).value();
-
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_GRID_LINE_WIDTH = 1;
-
-const LAYERS: { [key: string]: { label: string, def: Capabilities } } = {
-    topo: {
-        label: 'Mapa topograficzna',
-        def: topo
-    },
-    orto: {
-        label: 'Ortofotomapa',
-        def: orto
-    }
-};
 
 const parameterMapping = [
     { name: 'source', map: _.identity },
@@ -40,8 +17,8 @@ const parameterMapping = [
     { name: 'box.y1', map: Number },
     { name: 'box.x2', map: Number },
     { name: 'box.y2', map: Number },
-    { name: 'fontSize', map: (v:any) => Number(_.defaultTo(v, DEFAULT_FONT_SIZE)) },
-    { name: 'gridLineWidth', map: (v:any) => Number(_.defaultTo(v, DEFAULT_GRID_LINE_WIDTH)) },
+    { name: 'fontSize', map: (v: any) => Number(_.defaultTo(v, DEFAULT_FONT_SIZE)) },
+    { name: 'gridLineWidth', map: (v: any) => Number(_.defaultTo(v, DEFAULT_GRID_LINE_WIDTH)) },
 ];
 
 function getParameters(): MapParams {
@@ -88,16 +65,12 @@ class Fetch extends React.Component<{}, MapParams> {
         document.title = this.state.title;
     }
     render() {
-        const def: Capabilities = LAYERS[this.state.source].def;
+        const def = LAYERS[this.state.source].def;
         const svg = <SVGMap def={def} params={this.state} />;
         return <div>
             <div className="no-print">
-                <Select values={_.mapValues(LAYERS, v => v.label)}
-                    value={this.state.source}
-                    onChange={(layer) => this.setState({ source: layer })} />
-                <Select values={LEVELS}
-                    value={String(this.state.z)}
-                    onChange={(level) => this.setState({ z: Number(level) })} />
+                <LayerSelector onChange={value => this.setState(value)}
+                    layers={LAYERS} />
                 <input type="number"
                     min={0}
                     style={{ width: 50 }}

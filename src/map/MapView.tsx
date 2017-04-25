@@ -4,11 +4,15 @@ import * as _ from "lodash";
 import { setupProjections } from "../logic/proj4defs";
 import "openlayers/css/ol.css";
 import "./MapView.less";
+import { LayerSelector } from "../components/LayerSelector";
+import { LAYERS } from "../logic/layers";
 
 interface MapProps {
 }
 interface MapState {
-    selection: ol.Extent
+    selection: ol.Extent,
+    source: string,
+    z: number
 }
 interface Sources {
     [name: string]: ol.source.Tile
@@ -132,7 +136,7 @@ export class MapView extends React.Component<MapProps, MapState> {
         const coords = _.chunk(selection, 2).map((coord: ol.Coordinate) =>
             ol.proj.transform(coord, 'EPSG:3857', puwg92)
         );
-        return ['topo', 9, 'map'].concat(...coords);
+        return [this.state.source||'topo', this.state.z||9, 'map'].concat(...coords);
     }
     render() {
         const params = this.getFetchParams();
@@ -146,6 +150,7 @@ export class MapView extends React.Component<MapProps, MapState> {
                         <td>LatLon:</td><td id="latlon"></td>
                     </tr>
                 </table>
+                <LayerSelector layers={LAYERS} onChange={value => this.setState(value)} />
                 {!_.isEmpty(params) && <a className="button"
                     href={`fetch.html?${params.join('|')}`}>
                     Mapa
