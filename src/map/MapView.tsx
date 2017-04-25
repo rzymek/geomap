@@ -1,11 +1,15 @@
 import * as React from "react";
 import * as ol from "openlayers";
 import * as _ from "lodash";
-import "openlayers/css/ol.css"
+import { setupProjections } from "../logic/proj4defs";
+import "openlayers/css/ol.css";
+import "./MapView.less";
 
 interface MapProps {
 }
-
+interface MapState {
+    selection: ol.Extent
+}
 interface Sources {
     [name: string]: ol.source.Tile
 }
@@ -55,9 +59,12 @@ function createLayers(sources: Sources, selectionLayer: ol.source.Vector) {
     }));
     return layers;
 }
-const puwg92 = "EPSG:2180";
-export class MapView extends React.Component<MapProps, {}> {
+const puwg92 = "PUWG92";//'EPSG:2180";
+ol.proj.setProj4(setupProjections());
+
+export class MapView extends React.Component<MapProps, MapState> {
     componentDidMount() {
+        const component = this;
         const centerOfPoland = [17.2385334, 52.0688155]; //Piątek
         const selectionLayer = new ol.source.Vector();
         const sources = createSources();
@@ -67,9 +74,10 @@ export class MapView extends React.Component<MapProps, {}> {
             controls: ol.control.defaults().extend(
                 [
                     new ol.control.MousePosition({
-                        // coordinateFormat: function (coordinate) {
-                        //     return formatMGRS(coordinate);
-                        // },
+                        coordinateFormat: function (coordinate) {
+                            // return formatMGRS(coordinate);
+                            return "TODO";
+                        },
                         className: '',
                         projection: 'EPSG:4326',
                         target: document.getElementById('mgrs')
@@ -82,20 +90,6 @@ export class MapView extends React.Component<MapProps, {}> {
                         projection: 'EPSG:4326',
                         target: document.getElementById('latlon')
                     }),
-                    new ol.control.MousePosition({
-                        coordinateFormat: function (coordinate) {
-                            return ol.coordinate.toStringXY(coordinate, 0); // 0 decimal places
-                        },
-                        className: '',
-                        projection: puwg92,
-                        target: document.getElementById('puwg')
-                    }),
-                    new ol.control.MousePosition({
-                        coordinateFormat: (coordinate: ol.Coordinate) => ol.coordinate.toStringXY(coordinate, 0),
-                        className: '',
-                        projection: 'mercator',
-                        target: document.getElementById('mercator')
-                    }),
                     new ol.control.ScaleLine(),
                     new ol.control.ZoomSlider()
                 ]),
@@ -106,36 +100,65 @@ export class MapView extends React.Component<MapProps, {}> {
             })
         });
         layers[0].setVisible(true);
-        map.on('click', (event: ol.MapBrowserEvent) => {
-            const feature = map.forEachFeatureAtPixel(event.pixel, _.identity);
-            if (feature) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            console.log(feature);
-        });
-        map.addInteraction(new ol.interaction.Draw({
+        const drawSelection = new ol.interaction.Draw({
             source: selectionLayer,
             type: 'Circle',
             geometryFunction(coordinates, geometry: ol.geom.SimpleGeometry) {
-                if(geometry){
-                    selectionLayer.clear();
-                }
                 const createBox = (ol.interaction.Draw as any/*missing typing*/).createBox();
-                const box:ol.geom.Polygon = createBox(coordinates, geometry);
-                return box;
+                return createBox(coordinates, geometry);
             }
-        }));
+        });
+        drawSelection.on('drawstart', (event: ol.interaction.Draw.Event) => {
+            component.setState({
+                selection: undefined
+            });
+            selectionLayer.clear();
+        });
+        drawSelection.on('drawend', (event: ol.interaction.Draw.Event) => {
+            component.setState({
+                selection: event.feature.getGeometry().getExtent()
+            });
+        });
+        map.addInteraction(drawSelection);
     }
-
+    getFetchParams() {
+        if (!this.state) {
+            return [];
+        }
+        const { selection } = this.state;
+        if (selection === undefined) {
+            return [];
+        }
+        const coords = _.chunk(selection, 2).map((coord: ol.Coordinate) =>
+            ol.proj.transform(coord, 'EPSG:3857', puwg92)
+        );
+        return ['topo', 9, 'map'].concat(...coords);
+    }
     render() {
-        return <div id="map" style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 0
-        }}></div>
+        const params = this.getFetchParams();
+        return <div className="MapView">
+            <div className="panel">
+                <table className="coords">
+                    <tr>
+                        <td>MGRS:</td><td id="mgrs"></td>
+                    </tr>
+                    <tr>
+                        <td>LatLon:</td><td id="latlon"></td>
+                    </tr>
+                </table>
+                {!_.isEmpty(params) && <a className="button"
+                    href={`fetch.html?${params.join('|')}`}>
+                    Mapa
+                </a>}
+            </div>
+            <div id="map" style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 0
+            }} />
+        </div>
     }
 }
