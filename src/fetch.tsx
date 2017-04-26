@@ -6,6 +6,8 @@ import { LayerSelector } from "./components/LayerSelector";
 import { LAYERS } from "./logic/layers";
 import { setupProjections } from "./logic/proj4defs";
 import { SVGMap } from "./fetch/SVGMap";
+import { parseUrlParameters } from "./logic/url-parameters";
+
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_GRID_LINE_WIDTH = 1;
 
@@ -22,10 +24,7 @@ const parameterMapping = [
 ];
 
 function getParameters(): MapParams {
-    const query = location.search
-        .substr(1) //skip '?'
-        .split('|')
-        .map(decodeURIComponent);
+    const query = parseUrlParameters();
     return parameterMapping.reduce(
         (result, entry, idx) => _.set(result, entry.name, entry.map(query[idx])),
         {}

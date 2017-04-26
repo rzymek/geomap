@@ -11,11 +11,12 @@ import { createControls, CoordsDisplayDefs } from "./controls";
 import { createLayers } from "./layers";
 import { createAreaSelector } from "./areaSelector";
 import { CoordsDisplay } from "./coordsDisplay";
+import { parseUrlParameters } from "../logic/url-parameters";
 
 const puwg92 = "PUWG92";//'EPSG:2180";
 ol.proj.setProj4(setupProjections());
 
-const coordsDisplay:CoordsDisplayDefs = [
+const coordsDisplay: CoordsDisplayDefs = [
     { id: 'MGRS', formatter: pos => "TODO" },
     { id: 'LatLon', formatter: pos => ol.coordinate.toStringXY(pos, 4) },
 ];
@@ -28,6 +29,8 @@ interface MapState {
     z: number
 }
 export class MapView extends React.Component<MapProps, MapState> {
+    private selectionLayer = new ol.source.Vector();
+
     constructor() {
         super();
         this.state = {
@@ -38,30 +41,50 @@ export class MapView extends React.Component<MapProps, MapState> {
     }
 
     componentDidMount() {
-        const selectionLayer = new ol.source.Vector();
         new ol.Map({
             target: 'map',
             controls: createControls(coordsDisplay),
-            layers: createLayers(selectionLayer),
+            layers: createLayers(this.selectionLayer),
             view: new ol.View({
                 center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
                 zoom: 10
             }),
-            interactions: [
-                createAreaSelector(selectionLayer, selection => {
+            interactions: ol.interaction.defaults().extend([
+                createAreaSelector(this.selectionLayer, selection => {
                     this.setState({ selection })
                 })
-            ]
+            ])
         });
+        this.setSelection(parseUrlParameters().map(Number));
     }
 
-    getSelection(): ol.Coordinate[] {
+    componentDidUpdate() {
+        const query = _.flatten(this.getSelection()).join('|');
+        window.history.replaceState(undefined, undefined, `?${query}`);
+    }
+
+    private setSelection(selection: number[]) {
+        this.selectionLayer.clear();
+        if (_.isEmpty(selection)) {
+            return;
+        }
+        const coords = _.chunk(selection, 2).map((coord: ol.Coordinate) =>
+            ol.proj.transform(coord, puwg92, 'EPSG:3857')
+        );
+        this.setState({
+            selection: _.flatten(coords) as ol.Extent
+        })
+        const geometry = (ol.interaction.Draw as any).createBox()(coords);
+        this.selectionLayer.addFeature(new ol.Feature({ geometry }));
+    }
+
+    private getSelection(): ol.Coordinate[] {
         return _.chunk(this.state.selection, 2).map((coord: ol.Coordinate) =>
             ol.proj.transform(coord, 'EPSG:3857', puwg92)
         );
     }
 
-    getFetchParams(): (string | number)[] {
+    private getFetchParams(): (string | number)[] {
         return [
             this.state.source,
             this.state.z,
@@ -79,6 +102,11 @@ export class MapView extends React.Component<MapProps, MapState> {
                     href={`fetch.html?${this.getFetchParams().join('|')}`}>
                     Mapa
                 </a>}
+                <a className="button"
+                    onClick={() => {
+                        this.setState({ selection: undefined });
+                        this.setSelection(undefined);
+                    }}>Reset</a>
             </div>
             <div id="map" style={{
                 position: 'absolute',

@@ -11,6 +11,7 @@ export function createControls(defs: CoordsDisplayDefs) {
     return ol.control.defaults().extend(
         defs.map(def => new ol.control.MousePosition({
             coordinateFormat: def.formatter,
+            className: '',
             projection: _.defaultTo(def.projection,'EPSG:4326'),
             target: document.getElementById(def.id)
         }) as ol.control.Control).concat([
