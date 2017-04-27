@@ -10,16 +10,11 @@ import { createSources } from "./sources";
 import { createControls, CoordsDisplayDefs } from "./controls";
 import { createLayers } from "./layers";
 import { createAreaSelector } from "./areaSelector";
-import { CoordsDisplay } from "./coordsDisplay";
 import { parseUrlParameters } from "../logic/url-parameters";
+import { ll2mgrs } from "../logic/proj4defs";
 
 const puwg92 = "PUWG92";//'EPSG:2180";
 ol.proj.setProj4(setupProjections());
-
-const coordsDisplay: CoordsDisplayDefs = [
-    { id: 'MGRS', formatter: pos => "TODO" },
-    { id: 'LatLon', formatter: pos => ol.coordinate.toStringXY(pos, 4) },
-];
 
 interface MapProps {
 }
@@ -43,7 +38,14 @@ export class MapView extends React.Component<MapProps, MapState> {
     componentDidMount() {
         new ol.Map({
             target: 'map',
-            controls: createControls(coordsDisplay),
+            controls: ol.control.defaults().extend([
+                new ol.control.MousePosition({
+                    coordinateFormat: formatToMGRS,
+                    projection: 'EPSG:4326'
+                }),
+                new ol.control.ScaleLine(),
+                new ol.control.ZoomSlider()
+            ]),
             layers: createLayers(this.selectionLayer),
             view: new ol.View({
                 center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
@@ -95,7 +97,6 @@ export class MapView extends React.Component<MapProps, MapState> {
     render() {
         return <div className="MapView">
             <div className="panel">
-                <CoordsDisplay defs={coordsDisplay} />
                 <LayerSelector layers={LAYERS} onChange={value => this.setState(value)} />
                 {this.state.selection && <a className="button"
                     target="printable"
@@ -118,4 +119,9 @@ export class MapView extends React.Component<MapProps, MapState> {
             }} />
         </div>
     }
+}
+
+function formatToMGRS(pos: ol.Coordinate) {
+    const mgrs = ll2mgrs(pos);
+    return `${mgrs.zone} ${mgrs.grid} ${mgrs.x} ${mgrs.y}`;
 }

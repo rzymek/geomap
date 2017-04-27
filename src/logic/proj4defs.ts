@@ -64,9 +64,19 @@ export function puwg2utm(zone: number, puwg: CoordinatesArray): CoordinatesArray
         .forward(_.clone(puwg));
 }
 
-export function utm2mgrs(zone: number, utm: CoordinatesXY): { zone: string, grid: string, x: string, y: string } {
+interface MGRS {
+    zone: string,
+    grid: string,
+    x: string,
+    y: string
+}
+export function utm2mgrs(zone: number, utm: CoordinatesXY): MGRS {
     const ll = utm2ll(zone, utm);
-    const mgrsString = mgrs.forward([ll.x, ll.y]);
+    return ll2mgrs([ll.x, ll.y]);
+}
+
+export function ll2mgrs(ll: CoordinatesArray) {
+    const mgrsString = mgrs.forward(ll);
     const result = /(...)(..)(.....)(.....)/.exec(mgrsString);
     return {
         zone: result[1],
