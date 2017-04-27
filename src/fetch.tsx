@@ -84,7 +84,8 @@ class Fetch extends React.Component<{}, MapParams> {
                     value={this.state.gridLineWidth}
                     onChange={e => this.setState({ gridLineWidth: _.toNumber((e as any).target.value) })} />
                 <button onClick={e => window.print()} title="Ctrl+P">Drukuj</button>
-                <a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} download={`${this.state.title}.svg`}>SVG</a>
+                {/*<a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} 
+                download={`${this.state.title}.svg`}>SVG</a>*/}
             </div>
             {svg}
         </div>;
