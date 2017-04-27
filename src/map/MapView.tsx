@@ -12,6 +12,7 @@ import { createLayers } from "./layers";
 import { createAreaSelector } from "./areaSelector";
 import { parseUrlParameters } from "../logic/url-parameters";
 import { ll2mgrs } from "../logic/proj4defs";
+import { Drag } from "./dragFeatures";
 
 const puwg92 = "PUWG92";//'EPSG:2180";
 ol.proj.setProj4(setupProjections());
@@ -25,6 +26,11 @@ interface MapState {
 }
 export class MapView extends React.Component<MapProps, MapState> {
     private selectionLayer = new ol.source.Vector();
+    private map: ol.Map;
+    areaSelectorInteraction = createAreaSelector(this.selectionLayer, selection => {
+        this.setState({ selection })
+    });
+    dragInteraction = new Drag();
 
     constructor() {
         super();
@@ -36,7 +42,7 @@ export class MapView extends React.Component<MapProps, MapState> {
     }
 
     componentDidMount() {
-        new ol.Map({
+        this.map = new ol.Map({
             target: 'map',
             controls: ol.control.defaults().extend([
                 new ol.control.MousePosition({
@@ -52,17 +58,29 @@ export class MapView extends React.Component<MapProps, MapState> {
                 zoom: 10
             }),
             interactions: ol.interaction.defaults().extend([
-                createAreaSelector(this.selectionLayer, selection => {
-                    this.setState({ selection })
-                })
+                this.areaSelectorInteraction
             ])
         });
         this.setSelection(parseUrlParameters().map(Number));
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState) {
         const query = _.flatten(this.getSelection()).join('|');
         window.history.replaceState(undefined, undefined, `?${query}`);
+        const currentIsDrawMode = _.isEmpty(this.state.selection);
+        const prevIsDrawMode = _.isEmpty(prevState.selection);
+        if (prevIsDrawMode !== currentIsDrawMode) {
+            if (currentIsDrawMode) {
+                this.map.removeInteraction(this.dragInteraction);
+                this.map.addInteraction(this.areaSelectorInteraction);
+            } else {
+                this.map.removeInteraction(this.areaSelectorInteraction);
+                this.map.addInteraction(this.dragInteraction);
+                // this.map.addInteraction(new ol.interaction.Modify({
+                //     features: new ol.Collection(this.selectionLayer.getFeatures())
+                // }))
+            }
+        }
     }
 
     private setSelection(selection: number[]) {
@@ -77,7 +95,8 @@ export class MapView extends React.Component<MapProps, MapState> {
             selection: _.flatten(coords) as ol.Extent
         })
         const geometry = (ol.interaction.Draw as any).createBox()(coords);
-        this.selectionLayer.addFeature(new ol.Feature({ geometry }));
+        const feature = new ol.Feature({ geometry });
+        this.selectionLayer.addFeature(feature);
     }
 
     private getSelection(): ol.Coordinate[] {
