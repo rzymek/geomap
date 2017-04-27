@@ -1,5 +1,5 @@
 import * as React from "react";
-import { CoordinatesXY, CoordinatesArray, utmZone, puwg2ll, puwg2utm, utm2puwg } from "../logic/proj4defs";
+import { CoordinatesXY, CoordinatesArray, utmZone, puwg2ll, puwg2utm, utm2puwg, utm2mgrs } from "../logic/proj4defs";
 import { GridLine } from "./GridLine";
 import { Label } from "./Label";
 import { Box } from "../fetch";
@@ -99,7 +99,7 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             this.utmToPx(utmGrid[0]),
             this.utmToPx(utmGrid[1])
         );
-        return `rotate(${-angle})`
+        return `rotate(${-angle})`;
     }
     private utmToPx(coord: CoordinatesXY): CoordinatesXY {
         const { box, canvasSize } = this.props;
@@ -113,6 +113,12 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             x: (coord.x - box.x1) / (box.x2 - box.x1) * canvasSize.width,
             y: (coord.y - box.y2) / (box.y1 - box.y2) * canvasSize.height
         }
+    }
+    private formatUTM(zone:number, x:number, y:number, field:string):string{
+        const mgrs = utm2mgrs(zone, {x,y});
+        return `${mgrs.grid} ${(mgrs as any)[field]}`
+        // return `${mgrs.zone} ${mgrs.grid} ${(mgrs as any)[field]}`
+        // return `${zone} ${({x,y}as any)[field]}`; //full UTM
     }
     render() {
         const { step = 1000, box, canvasSize } = this.props;
@@ -133,13 +139,13 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             .map(x => ({
                 p1: this.utmToPx({ x, y: utmGrid[0].y - step }),
                 p2: this.utmToPx({ x, y: utmGrid[2].y + step }),
-                label: _.toString(x)
+                label: this.formatUTM(zone, x,utmGrid[0].y,'x')
             }));
         const horizontalLines: LabeledLine[] = _.range(utmGrid[0].y - step, utmGrid[2].y + step, step)
             .map(y => ({
                 p1: this.utmToPx({ x: utmGrid[0].x - step, y }),
                 p2: this.utmToPx({ x: utmGrid[2].x + step, y }),
-                label: _.toString(y)
+                label: this.formatUTM(zone, utmGrid[0].x,y,'y')
             }));
 
         return <g>
@@ -149,8 +155,8 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                     {_.concat(
                         verticalLines,
                         horizontalLines
-                    ).map(line =>
-                        <GridLine key={line.label}
+                    ).map((line,idx) =>
+                        <GridLine key={idx}
                             strokeWidth={this.props.params.gridLineWidth}
                             line={line} />
                         )}
