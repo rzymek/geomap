@@ -97,7 +97,7 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
     private getGridRotation(utmGrid: CoordinatesXY[]): string {
         const angle = angleDeg(
             this.utmToPx(utmGrid[0]),
-            this.utmToPx(utmGrid[1])
+            this.utmToPx({x:utmGrid[1].x, y:utmGrid[0].y})
         );
         return `rotate(${-angle})`;
     }
