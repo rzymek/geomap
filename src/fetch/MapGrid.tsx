@@ -91,8 +91,8 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             this.utmToPx(utmGrid[0]),
             this.utmToPx({ x: utmGrid[1].x, y: utmGrid[0].y })
         );
-        return '';
-        // return `rotate(${-angle})`;
+        // return '';
+        return `rotate(${-angle})`;
     }
     private utmToPx(coord: CoordinatesXY): CoordinatesXY {
         const { box, canvasSize } = this.props;
