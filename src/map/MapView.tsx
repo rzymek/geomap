@@ -14,7 +14,8 @@ import { parseUrlParameters } from "../logic/url-parameters";
 import { ll2mgrs } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
 
-const puwg92 = "PUWG92";//'EPSG:2180";
+const PUGW92 = "PUWG92";//'EPSG:2180";
+const WEB_MERCATOR = "EPSG:3857";
 ol.proj.setProj4(setupProjections());
 
 interface MapProps {
@@ -54,7 +55,7 @@ export class MapView extends React.Component<MapProps, MapState> {
             ]),
             layers: createLayers(this.selectionLayer),
             view: new ol.View({
-                center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', 'EPSG:3857'),
+                center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', WEB_MERCATOR),
                 zoom: 10
             }),
             interactions: ol.interaction.defaults().extend([
@@ -89,7 +90,7 @@ export class MapView extends React.Component<MapProps, MapState> {
             return;
         }
         const coords = _.chunk(selection, 2).map((coord: ol.Coordinate) =>
-            ol.proj.transform(coord, puwg92, 'EPSG:3857')
+            ol.proj.transform(coord, PUGW92, WEB_MERCATOR)
         );
         this.setState({
             selection: _.flatten(coords) as ol.Extent
@@ -101,7 +102,7 @@ export class MapView extends React.Component<MapProps, MapState> {
 
     private getSelection(): ol.Coordinate[] {
         return _.chunk(this.state.selection, 2).map((coord: ol.Coordinate) =>
-            ol.proj.transform(coord, 'EPSG:3857', puwg92)
+            ol.proj.transform(coord, WEB_MERCATOR, PUGW92)
         );
     }
 

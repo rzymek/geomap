@@ -47,11 +47,11 @@ const proj4cache = new class Proj4Cache {
 /**
  * @param {number[2]} latLon
  */
-export function ll2utm(zone: number, latLon: Coordinates): Coordinates {
+export function ll2utm<K extends Coordinates>(zone: number, latLon: K): K {
     return proj4cache.get("WGS84", "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
         .forward(_.clone(latLon));
 }
-export function utm2ll(zone: number, utm: Coordinates): CoordinatesXY {
+export function utm2ll<K extends Coordinates>(zone: number, utm: K): K {
     return proj4cache.get("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", "WGS84")
         .forward(_.clone(utm));
 }
