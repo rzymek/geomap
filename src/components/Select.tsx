@@ -2,7 +2,7 @@ import * as React from "react";
 import * as _ from "lodash";
 
 interface SelectProps {
-    values: {[value: string]: string}
+    values: {[value: string]: any}
     value: string,
     onChange(v: string): void
 }

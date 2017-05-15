@@ -9,10 +9,12 @@ import { LAYERS } from "../logic/layers";
 import { createSources } from "./sources";
 import { createControls, CoordsDisplayDefs } from "./controls";
 import { createLayers } from "./layers";
-import { createAreaSelector } from "./areaSelector";
+import { createAreaSelector, Orientation } from "./areaSelector";
 import { parseUrlParameters } from "../logic/url-parameters";
 import { ll2mgrs } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
+import { enumMap } from "../logic/enumValues";
+import { Select } from "../components/Select";
 
 const PUGW92 = "PUWG92";//'EPSG:2180";
 const WEB_MERCATOR = "EPSG:3857";
@@ -22,21 +24,26 @@ interface MapProps {
 }
 interface MapState {
     selection: ol.Extent,
+    orientation: Orientation,
     source: string,
     z: number
 }
 export class MapView extends React.Component<MapProps, MapState> {
     private selectionLayer = new ol.source.Vector();
     private map: ol.Map;
-    areaSelectorInteraction = createAreaSelector(this.selectionLayer, selection => {
-        this.setState({ selection })
-    });
+    areaSelectorInteraction = createAreaSelector(
+        this.selectionLayer,
+        () => this.state.orientation,
+        selection => {
+            this.setState({ selection })
+        });
     dragInteraction = new Drag();
 
     constructor() {
         super();
         this.state = {
             selection: undefined,
+            orientation: Orientation.LANDSCAPE,
             source: 'topo',
             z: 9
         }
@@ -118,6 +125,9 @@ export class MapView extends React.Component<MapProps, MapState> {
         return <div className="MapView">
             <div className="panel">
                 <LayerSelector layers={LAYERS} onChange={value => this.setState(value)} />
+                <Select values={enumMap(Orientation)}
+                    value={this.state.orientation.toString()}
+                    onChange={(value) => this.setState({ orientation: Number(value) })} />
                 {this.state.selection && <a className="button"
                     target="printable"
                     href={`fetch.html?${this.getFetchParams().join('|')}`}>
