@@ -21,10 +21,10 @@ const WEB_MERCATOR = "EPSG:3857";
 ol.proj.setProj4(setupProjections());
 
 enum PageHeight {
-    A3 = 420,
-    A4 = 297
+    A3 = 297,
+    A4 = 210
 }
-const PAGE_MARGIN = 5 /*mm*/;
+const PAGE_MARGIN = 10 /*mm*/;
 
 interface MapProps {
 }
@@ -126,20 +126,20 @@ export class MapView extends React.Component<MapProps, MapState> {
         if (orientation === Orientation.NONE || _.isEmpty(selection)) {
             return;
         }
-        const index = orientation === Orientation.LANDSCAPE ? 0 : 1
-        const mapAreaHeight = Math.abs(selection[1][index] - selection[0][index]);
-        const pageHeight = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
-        return Math.round(mapAreaHeight / pageHeight);
+        const index = orientation === Orientation.LANDSCAPE ? 1 : 0;
+        const mapAreaLength = Math.abs(selection[1][index] - selection[0][index]);
+        const pageLength = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
+        return Math.round(mapAreaLength / pageLength);
     }
     private setScale(scale: number, pageType: PageHeight): void {
         const { orientation } = this.state;
         const selection = this.getSelection();
-        const index = orientation === Orientation.LANDSCAPE ? 0 : 1;
+        const index = orientation === Orientation.LANDSCAPE ? 1 : 0;
         const otherIndex = (index + 1) % 2;
         const ISO216PaperRatio = 1 / Math.sqrt(2);
-        const pageHeight = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
-        selection[1][index] = selection[0][index] + pageHeight * scale;
-        selection[1][otherIndex] = selection[0][otherIndex] + pageHeight * scale * ISO216PaperRatio;
+        const pageLength = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
+        selection[1][index] = selection[0][index] + pageLength * scale;
+        selection[1][otherIndex] = selection[0][otherIndex] + pageLength * scale / ISO216PaperRatio;
         this.setSelection(_.flatten(selection));
     }
 
@@ -161,7 +161,7 @@ export class MapView extends React.Component<MapProps, MapState> {
                 {this.state.orientation !== Orientation.NONE &&
                     Object.keys(PageHeight).filter(v => _.isNaN(Number(v))).map(pageType => [
                         <br />,
-                        <label>
+                        <label title="Margines: 1cm">
                             {pageType}: 1:<input
                                 type="number"
                                 min={100}
