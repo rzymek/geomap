@@ -10,7 +10,7 @@ const LEVELS: { [zoom: number]: string } = _.chain({
     10: '1:10 000',
     11: '1:10 000',
     12: '1:10 000'
-}).mapValues((value, key) => `${key} - ${value}`).value();
+}).mapValues((value, key) => `${key} - skan ${value}`).value();
 
 interface Props {
     layers: { [name: string]: { label: string } },

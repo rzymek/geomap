@@ -54,6 +54,7 @@ export function createAreaSelector(
                 utm2ll(zone, [topLeft[0], bottomRight[1]]),
                 utm2ll(zone, topLeft)
             ].map(c => ol.proj.transform(c, 'EPSG:4326', "EPSG:3857"))]);
+            onSelection(geometry.getExtent());
             return geometry;
         }
     });

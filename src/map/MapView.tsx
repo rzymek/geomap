@@ -20,6 +20,12 @@ const PUGW92 = "PUWG92";//'EPSG:2180";
 const WEB_MERCATOR = "EPSG:3857";
 ol.proj.setProj4(setupProjections());
 
+enum PageHeight {
+    A3 = 420,
+    A4 = 297
+}
+const PAGE_MARGIN = 5 /*mm*/;
+
 interface MapProps {
 }
 interface MapState {
@@ -75,20 +81,21 @@ export class MapView extends React.Component<MapProps, MapState> {
     componentDidUpdate(prevProps, prevState) {
         const query = _.flatten(this.getSelection()).join('|');
         window.history.replaceState(undefined, undefined, `?${query}`);
-        const currentIsDrawMode = _.isEmpty(this.state.selection);
-        const prevIsDrawMode = _.isEmpty(prevState.selection);
-        if (prevIsDrawMode !== currentIsDrawMode) {
-            if (currentIsDrawMode) {
-                this.map.removeInteraction(this.dragInteraction);
-                this.map.addInteraction(this.areaSelectorInteraction);
-            } else {
-                this.map.removeInteraction(this.areaSelectorInteraction);
-                this.map.addInteraction(this.dragInteraction);
-                // this.map.addInteraction(new ol.interaction.Modify({
-                //     features: new ol.Collection(this.selectionLayer.getFeatures())
-                // }))
-            }
-        }
+
+        // const currentIsDrawMode = _.isEmpty(this.state.selection);
+        // const prevIsDrawMode = _.isEmpty(prevState.selection);
+        // if (prevIsDrawMode !== currentIsDrawMode) {
+        //     if (currentIsDrawMode) {
+        //         this.map.removeInteraction(this.dragInteraction);
+        //         this.map.addInteraction(this.areaSelectorInteraction);
+        //     } else {
+        //         this.map.removeInteraction(this.areaSelectorInteraction);
+        //         this.map.addInteraction(this.dragInteraction);
+        //         // this.map.addInteraction(new ol.interaction.Modify({
+        //         //     features: new ol.Collection(this.selectionLayer.getFeatures())
+        //         // }))
+        //     }
+        // }
     }
 
     private setSelection(selection: number[]) {
@@ -113,6 +120,29 @@ export class MapView extends React.Component<MapProps, MapState> {
         );
     }
 
+    private getScale(pageType: PageHeight): number {
+        const { orientation } = this.state;
+        const selection = this.getSelection();
+        if (orientation === Orientation.NONE || _.isEmpty(selection)) {
+            return;
+        }
+        const index = orientation === Orientation.LANDSCAPE ? 0 : 1
+        const mapAreaHeight = Math.abs(selection[1][index] - selection[0][index]);
+        const pageHeight = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
+        return Math.round(mapAreaHeight / pageHeight);
+    }
+    private setScale(scale: number, pageType: PageHeight): void {
+        const { orientation } = this.state;
+        const selection = this.getSelection();
+        const index = orientation === Orientation.LANDSCAPE ? 0 : 1;
+        const otherIndex = (index + 1) % 2;
+        const ISO216PaperRatio = 1 / Math.sqrt(2);
+        const pageHeight = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
+        selection[1][index] = selection[0][index] + pageHeight * scale;
+        selection[1][otherIndex] = selection[0][otherIndex] + pageHeight * scale * ISO216PaperRatio;
+        this.setSelection(_.flatten(selection));
+    }
+
     private getFetchParams(): (string | number)[] {
         return [
             this.state.source,
@@ -128,6 +158,19 @@ export class MapView extends React.Component<MapProps, MapState> {
                 <Select values={enumMap(Orientation)}
                     value={this.state.orientation.toString()}
                     onChange={(value) => this.setState({ orientation: Number(value) })} />
+                {this.state.orientation !== Orientation.NONE &&
+                    Object.keys(PageHeight).filter(v => _.isNaN(Number(v))).map(pageType => [
+                        <br />,
+                        <label>
+                            {pageType}: 1:<input
+                                type="number"
+                                min={100}
+                                max={500000}
+                                step={100}
+                                value={_.defaultTo(this.getScale(PageHeight[pageType]) as any, '')}
+                                onChange={e => this.setScale(Number(e.target.value), PageHeight[pageType])} />
+                        </label>
+                    ])}
                 {this.state.selection && <a className="button"
                     target="printable"
                     href={`fetch.html?${this.getFetchParams().join('|')}`}>
