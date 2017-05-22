@@ -15,14 +15,9 @@ import { PUGW92, WEB_MERCATOR, WGS84, ll2mgrs } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
 import { enumMap } from "../logic/enumValues";
 import { Select } from "../components/Select";
+import {PageHeight,getScale,getSelectionForScale} from "./mapScale";
 
 ol.proj.setProj4(setupProjections());
-
-enum PageHeight {
-    A3 = 297,
-    A4 = 210
-}
-const PAGE_MARGIN = 10 /*mm*/;
 
 interface MapProps {
 }
@@ -126,21 +121,21 @@ export class MapView extends React.Component<MapProps, MapState> {
         if (orientation === Orientation.NONE || _.isEmpty(selection)) {
             return;
         }
-        const index = orientation === Orientation.LANDSCAPE ? 1 : 0;
-        const mapAreaLength = Math.abs(selection[1][index] - selection[0][index]);
-        const pageLength = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
-        return Math.round(mapAreaLength / pageLength);
+        return getScale({
+            selection,
+            pageType, 
+            orientation
+        });
     }
     private setScale(scale: number, pageType: PageHeight): void {
         const { orientation } = this.state;
         const selection = this.getSelection();
-        const index = orientation === Orientation.LANDSCAPE ? 1 : 0;
-        const otherIndex = (index + 1) % 2;
-        const ISO216PaperRatio = 1 / Math.sqrt(2);
-        const pageLength = (pageType /*mm*/ - 2 * PAGE_MARGIN) / 1000; /*m*/
-        selection[1][index] = selection[0][index] + pageLength * scale;
-        selection[1][otherIndex] = selection[0][otherIndex] + pageLength * scale / ISO216PaperRatio;
-        this.setSelection(_.flatten(selection));
+        this.setSelection(getSelectionForScale({
+            scale,
+            selection,
+            pageType,
+            orientation
+        }));
     }
 
     private getFetchParams(): (string | number)[] {
