@@ -29,7 +29,8 @@ function keepAspectRatio(start: ol.Coordinate, end: ol.Coordinate, ratio: number
 export function createAreaSelector(
     selectionLayer: ol.source.Vector,
     getAspectRatioOrientation: ()=>Orientation,
-    onSelection: (selected: ol.Extent) => void
+    onSelection: (selected: ol.Extent) => void,
+    onDrawEnd: (selected: ol.Extent) => void,
 ): ol.interaction.Interaction {
     const component = this;
     const drawSelection = new ol.interaction.Draw({
@@ -59,11 +60,12 @@ export function createAreaSelector(
         }
     });
     drawSelection.on('drawstart', (event: ol.interaction.Draw.Event) => {
-        onSelection(undefined);
         selectionLayer.clear();
     });
     drawSelection.on('drawend', (event: ol.interaction.Draw.Event) => {
-        onSelection(event.feature.getGeometry().getExtent());
+        const extent = event.feature.getGeometry().getExtent();
+        onSelection(extent);
+        onDrawEnd(extent);
     });
     return drawSelection;
 }

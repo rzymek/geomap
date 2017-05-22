@@ -5,7 +5,7 @@ import * as ol from "openlayers";
  * @constructor
  * @extends {ol.interaction.Pointer}
  */
-export const Drag = function() {
+export const Drag = function () {
 
   ol.interaction.Pointer.call(this, {
     handleDownEvent: Drag.prototype.handleDownEvent,
@@ -46,13 +46,13 @@ ol.inherits(Drag, ol.interaction.Pointer as any);
  * @param {ol.MapBrowserEvent} evt Map browser event.
  * @return {boolean} `true` to start the drag sequence.
  */
-Drag.prototype.handleDownEvent = function(evt) {
+Drag.prototype.handleDownEvent = function (evt) {
   var map = evt.map;
 
   var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
-        return feature;
-      });
+    function (feature, layer) {
+      return feature;
+    });
 
   if (feature) {
     this.coordinate_ = evt.coordinate;
@@ -66,19 +66,19 @@ Drag.prototype.handleDownEvent = function(evt) {
 /**
  * @param {ol.MapBrowserEvent} evt Map browser event.
  */
-Drag.prototype.handleDragEvent = function(evt) {
+Drag.prototype.handleDragEvent = function (evt) {
   var map = evt.map;
 
   var feature = map.forEachFeatureAtPixel(evt.pixel,
-      function(feature, layer) {
-        return feature;
-      });
+    function (feature, layer) {
+      return feature;
+    });
 
   var deltaX = evt.coordinate[0] - this.coordinate_[0];
   var deltaY = evt.coordinate[1] - this.coordinate_[1];
 
   var geometry = /** @type {ol.geom.SimpleGeometry} */
-      (this.feature_.getGeometry());
+    (this.feature_.getGeometry());
   geometry.translate(deltaX, deltaY);
 
   this.coordinate_[0] = evt.coordinate[0];
@@ -89,13 +89,13 @@ Drag.prototype.handleDragEvent = function(evt) {
 /**
  * @param {ol.MapBrowserEvent} evt Event.
  */
-Drag.prototype.handleMoveEvent = function(evt) {
+Drag.prototype.handleMoveEvent = function (evt) {
   if (this.cursor_) {
     var map = evt.map;
     var feature = map.forEachFeatureAtPixel(evt.pixel,
-        function(feature, layer) {
-          return feature;
-        });
+      function (feature, layer) {
+        return feature;
+      });
     var element = evt.map.getTargetElement();
     if (feature) {
       if (element.style.cursor != this.cursor_) {
@@ -114,7 +114,11 @@ Drag.prototype.handleMoveEvent = function(evt) {
  * @param {ol.MapBrowserEvent} evt Map browser event.
  * @return {boolean} `false` to stop the drag sequence.
  */
-Drag.prototype.handleUpEvent = function(evt) {
+Drag.prototype.handleUpEvent = function (evt) {
+  this.dispatchEvent({
+    type:"moveend",
+    feature: this.feature_
+  });
   this.coordinate_ = null;
   this.feature_ = null;
   return false;

@@ -40,7 +40,8 @@ export class MapView extends React.Component<MapProps, MapState> {
         () => this.state.orientation,
         selection => {
             this.setState({ selection })
-        });
+        },
+        () => this.setAreaDragMode());
     dragInteraction = new Drag();
 
     constructor() {
@@ -51,8 +52,16 @@ export class MapView extends React.Component<MapProps, MapState> {
             source: 'topo',
             z: 9
         }
+        this.dragInteraction.on('moveend',event=>{
+            const extent = event.feature.getGeometry().getExtent();
+            this.setState({selection:extent});
+        });
     }
 
+    setAreaDragMode() {
+        this.map.removeInteraction(this.areaSelectorInteraction);
+        this.map.addInteraction(this.dragInteraction);
+    }
     componentDidMount() {
         this.map = new ol.Map({
             target: 'map',
@@ -73,30 +82,23 @@ export class MapView extends React.Component<MapProps, MapState> {
                 this.areaSelectorInteraction
             ])
         });
-        this.setSelection(parseUrlParameters().map(Number));
+        const selectionParam = parseUrlParameters().map(Number);
+        this.setSelection(selectionParam);
+        if(!_.isEmpty(selectionParam)){
+            this.setAreaDragMode();
+        }
     }
 
     componentDidUpdate(prevProps, prevState) {
         const query = _.flatten(this.getSelection()).join('|');
         window.history.replaceState(undefined, undefined, `?${query}`);
-
-        // const currentIsDrawMode = _.isEmpty(this.state.selection);
-        // const prevIsDrawMode = _.isEmpty(prevState.selection);
-        // if (prevIsDrawMode !== currentIsDrawMode) {
-        //     if (currentIsDrawMode) {
-        //         this.map.removeInteraction(this.dragInteraction);
-        //         this.map.addInteraction(this.areaSelectorInteraction);
-        //     } else {
-        //         this.map.removeInteraction(this.areaSelectorInteraction);
-        //         this.map.addInteraction(this.dragInteraction);
-        //         // this.map.addInteraction(new ol.interaction.Modify({
-        //         //     features: new ol.Collection(this.selectionLayer.getFeatures())
-        //         // }))
-        //     }
-        // }
     }
 
     private setSelection(selection: number[]) {
+        if (selection === undefined) {
+            this.map.removeInteraction(this.dragInteraction);
+            this.map.addInteraction(this.areaSelectorInteraction);
+        }
         this.selectionLayer.clear();
         if (_.isEmpty(selection)) {
             return;
