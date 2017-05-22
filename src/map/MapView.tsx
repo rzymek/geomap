@@ -16,6 +16,7 @@ import { Drag } from "./dragFeatures";
 import { enumMap } from "../logic/enumValues";
 import { Select } from "../components/Select";
 import { PageHeight, getScale, getSelectionForScale } from "./mapScale";
+import { MapScaleSelector } from "./MapScaleSelector";
 
 ol.proj.setProj4(setupProjections());
 
@@ -168,7 +169,7 @@ export class MapView extends React.Component<MapProps, MapState> {
                     href={`fetch.html?${this.getFetchParams().join('|')}`}>
                     Mapa
                 </a>}
-                < a className="button"
+                <a className="button"
                     onClick={() => {
                         this.setState({ selection: undefined });
                         this.setSelection(undefined);
@@ -190,32 +191,3 @@ function formatToMGRS(pos: ol.Coordinate) {
     const mgrs = ll2mgrs(pos);
     return `${mgrs.zone} ${mgrs.grid} ${mgrs.x} ${mgrs.y}`;
 }
-
-const MapScaleSelector = (props: {
-    margin: number,
-    onMarginChange: (value: number) => void,
-    getScale: (pageType: PageHeight) => number
-    onScaleChange: (value: number, pageSize: PageHeight) => void,
-}) => <div>
-        <label>
-            Margines: <input type="number" min={0} max={100} step={1}
-                size={3} maxLength={3} style={{width:51}}
-                title="mm"
-                value={props.margin}
-                onChange={e => props.onMarginChange(Number(e.target.value))} />
-        </label>
-        {Object.keys(PageHeight).filter(v => _.isNaN(Number(v))).map(pageType => [
-            <br />,
-            <label>
-                {pageType}: 1:<input
-                    type="number"
-                    min={100}
-                    max={500000}
-                    step={100}
-                    value={_.defaultTo(props.getScale(PageHeight[pageType]) as any, '')}
-                    onChange={e => props.onScaleChange(Number(e.target.value), PageHeight[pageType])} />
-            </label>
-        ])}
-    </div>;
-
-    //_.defaultTo(this.getScale(PageHeight[pageType]) as any, '')
