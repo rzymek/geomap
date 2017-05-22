@@ -27,7 +27,14 @@ export type Coordinates = CoordinatesXY | CoordinatesArray;
 export function puwg2ll(puwg: CoordinatesArray): CoordinatesArray {
     return proj4cache.get(PUGW92, WGS84).forward(puwg);
 }
+export function ll2pugw(puwg: CoordinatesArray): CoordinatesArray {
+    return proj4cache.get(PUGW92, WGS84).inverse(puwg);
+}
 export function utmZone(latLon: CoordinatesArray): number {
+    return 1 + Math.floor((latLon[0] + 180) / 6);
+}
+export function utmZoneWM(c: ol.Coordinate/*WEB_MERCATOR*/): number {
+    const latLon = ol.proj.transform(c, WEB_MERCATOR, WGS84);
     return 1 + Math.floor((latLon[0] + 180) / 6);
 }
 
@@ -49,12 +56,27 @@ const proj4cache = new class Proj4Cache {
 
 
 /**
+ * @deprecated
  * @param {number[2]} latLon
  */
 export function ll2utm<K extends Coordinates>(zone: number, latLon: K): K {
     return proj4cache.get(WGS84, "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
         .forward(_.clone(latLon));
 }
+export function webmercator2utm(zone: number, c: ol.Coordinate): ol.Coordinate {
+    return proj4cache.get(WEB_MERCATOR, "+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+        .forward(_.clone(c));
+}
+export function webmercator2ll(c: ol.Coordinate): ol.Coordinate {
+    return proj4cache.get(WEB_MERCATOR, WGS84).forward(_.clone(c));
+}
+export function utm2webmercator(zone: number, utm: ol.Coordinate): ol.Coordinate {
+    return proj4cache.get("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", WEB_MERCATOR)
+        .forward(_.clone(utm));
+}
+/**
+ * @deprecated
+ */
 export function utm2ll<K extends Coordinates>(zone: number, utm: K): K {
     return proj4cache.get("+proj=utm +zone=" + zone + " +north +ellps=WGS84 +datum=WGS84 +units=m +no_defs", WGS84)
         .forward(_.clone(utm));
@@ -88,4 +110,8 @@ export function ll2mgrs(ll: CoordinatesArray) {
         x: result[3],
         y: result[4]
     }
+}
+export function mgrs2webmercator(c: string) {
+    const ll = mgrs.toPoint(c);
+    return proj4cache.get(WEB_MERCATOR, WGS84).inverse(ll);
 }

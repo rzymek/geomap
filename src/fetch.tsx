@@ -4,31 +4,45 @@ import * as ReactDOMServer from "react-dom/server";
 import * as _ from "lodash";
 import { LayerSelector } from "./components/LayerSelector";
 import { LAYERS } from "./logic/layers";
-import { setupProjections } from "./logic/proj4defs";
+import { setupProjections, ll2pugw } from "./logic/proj4defs";
 import { SVGMap } from "./fetch/SVGMap";
-import { parseUrlParameters } from "./logic/url-parameters";
+import { WebMercatorMapArea } from "./map/utmArea";
+import { parseUrlParameters, urlParamsToMapArea } from "./logic/url-parameters";
+import * as mgrs from "mgrs";
 
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_GRID_LINE_WIDTH = 1;
 
-const parameterMapping = [
-    { name: 'source', map: _.identity },
-    { name: 'z', map: Number },
-    { name: 'title', map: _.identity },
-    { name: 'box.x1', map: Number },
-    { name: 'box.y1', map: Number },
-    { name: 'box.x2', map: Number },
-    { name: 'box.y2', map: Number },
-    { name: 'fontSize', map: (v: any) => Number(_.defaultTo(v, DEFAULT_FONT_SIZE)) },
-    { name: 'gridLineWidth', map: (v: any) => Number(_.defaultTo(v, DEFAULT_GRID_LINE_WIDTH)) },
-];
+function mgrsBoundsToPuwgBox(area: string[]): Box {
+    const [topLeftPUWG, bottomRightPUWG] = area
+        .map(mgrsCoord => mgrs.toPoint(mgrsCoord))
+        .map(ll2pugw);
+    const box = {
+        x1: topLeftPUWG[0],
+        y1: topLeftPUWG[1],
+        x2: bottomRightPUWG[0],
+        y2: bottomRightPUWG[1]
+    }
+    return {
+        x1: Math.min(box.x1, box.x2),
+        y1: Math.min(box.y1, box.y2),
+        x2: Math.max(box.x1, box.x2),
+        y2: Math.max(box.y1, box.y2),
+    }
+}
 
-function getParameters(): MapParams {
-    const query = parseUrlParameters();
-    return parameterMapping.reduce(
-        (result, entry, idx) => _.set(result, entry.name, entry.map(query[idx])),
-        {}
-    ) as MapParams;
+function getParameters(url?: string): MapParams {
+    const [coords, mapParams] = _.defaultTo(url, location.search).split(/:/);
+    const area = parseUrlParameters(coords);
+    const [source, z, fontSize, gridLineWidth] = mapParams.split(/-/);
+    return {
+        source,
+        z: Number(z),
+        title: coords,
+        box: mgrsBoundsToPuwgBox(area),
+        fontSize: _.defaultTo(Number(fontSize), DEFAULT_FONT_SIZE),
+        gridLineWidth: _.defaultTo(Number(gridLineWidth), DEFAULT_GRID_LINE_WIDTH)
+    }
 }
 export interface Box {
     x1: number,
@@ -57,12 +71,17 @@ class Fetch extends React.Component<{}, MapParams> {
     }
 
     componentDidUpdate() {
-        const query = parameterMapping
-            .map(entry => _.get(this.state, entry.name))
-            .join('|');
-        window.history.replaceState(undefined, undefined, `?${query}`);
+        const coords = location.search.split(/:/)[0];
+        const mapParams = [
+            this.state.source, 
+            this.state.z, 
+            this.state.fontSize,
+            this.state.gridLineWidth
+        ].join('-');
+        window.history.replaceState(undefined, undefined, `${coords}:${mapParams}`);
         document.title = this.state.title;
     }
+
     render() {
         const def = LAYERS[this.state.source].def;
         const svg = <SVGMap def={def} params={this.state} />;

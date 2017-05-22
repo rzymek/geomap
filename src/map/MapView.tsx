@@ -9,21 +9,22 @@ import { LAYERS } from "../logic/layers";
 import { createSources } from "./sources";
 import { createControls, CoordsDisplayDefs } from "./controls";
 import { createLayers } from "./layers";
-import { createAreaSelector, Orientation } from "./areaSelector";
-import { parseUrlParameters } from "../logic/url-parameters";
-import { PUGW92, WEB_MERCATOR, WGS84, ll2mgrs } from "../logic/proj4defs";
+import { createAreaSelector, Orientation, toMapSelection } from "./areaSelector";
+import { mapAreaToUrlParams, urlParamsToMapArea } from "../logic/url-parameters";
+import { PUGW92, WEB_MERCATOR, WGS84, ll2mgrs, mgrs2webmercator } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
 import { enumMap } from "../logic/enumValues";
 import { Select } from "../components/Select";
 import { PageHeight, getScale, getSelectionForScale } from "./mapScale";
 import { MapScaleSelector } from "./MapScaleSelector";
+import { WebMercatorMapArea, getUTMAreaBox } from "./utmArea"
 
 ol.proj.setProj4(setupProjections());
 
 interface MapProps {
 }
 interface MapState {
-    selection: ol.Extent,
+    selection: WebMercatorMapArea,
     orientation: Orientation,
     source: string,
     margin: number,
@@ -35,9 +36,7 @@ export class MapView extends React.Component<MapProps, MapState> {
     areaSelectorInteraction = createAreaSelector(
         this.selectionLayer,
         () => this.state.orientation,
-        selection => {
-            this.setState({ selection })
-        },
+        selection => this.setState({ selection }),
         () => this.setAreaDragMode());
     dragInteraction = new Drag();
 
@@ -51,8 +50,10 @@ export class MapView extends React.Component<MapProps, MapState> {
             z: 9
         }
         this.dragInteraction.on('moveend', event => {
-            const extent = event.feature.getGeometry().getExtent();
-            this.setState({ selection: extent });
+            const geom = event.feature.getGeometry();
+            if (geom instanceof ol.geom.Polygon) {
+                this.setState({ selection: toMapSelection(geom) });
+            }
         });
     }
 
@@ -60,8 +61,14 @@ export class MapView extends React.Component<MapProps, MapState> {
         this.map.removeInteraction(this.areaSelectorInteraction);
         this.map.addInteraction(this.dragInteraction);
     }
-    componentDidMount() {
-        this.map = new ol.Map({
+
+    setAreaDrawMode() {
+        this.map.removeInteraction(this.dragInteraction);
+        this.map.addInteraction(this.areaSelectorInteraction);
+    }
+
+    private createMap() {
+        return new ol.Map({
             target: 'map',
             controls: ol.control.defaults().extend([
                 new ol.control.MousePosition({
@@ -80,48 +87,43 @@ export class MapView extends React.Component<MapProps, MapState> {
                 this.areaSelectorInteraction
             ])
         });
-        const selectionParam = parseUrlParameters().map(Number);
-        this.setSelection(selectionParam);
-        if (!_.isEmpty(selectionParam)) {
-            this.setAreaDragMode();
-        }
+    }
+
+    private updateSelectionFromUrlParams() {
+        this.setSelection(urlParamsToMapArea());
+    }
+
+    componentDidMount() {
+        this.map = this.createMap();
+        this.updateSelectionFromUrlParams();
     }
 
     componentDidUpdate(prevProps, prevState) {
-        const query = _.flatten(this.getSelection()).join('|');
-        window.history.replaceState(undefined, undefined, `?${query}`);
+        window.history.replaceState(undefined, undefined,
+            '?' + mapAreaToUrlParams(this.state.selection)
+        );
     }
 
-    private setSelection(selection: number[]) {
+
+    private setSelection(selection: WebMercatorMapArea) {
         if (selection === undefined) {
-            this.map.removeInteraction(this.dragInteraction);
-            this.map.addInteraction(this.areaSelectorInteraction);
+            this.setAreaDrawMode();
+        } else {
+            this.setAreaDragMode();
         }
         this.selectionLayer.clear();
         if (_.isEmpty(selection)) {
             return;
         }
-        const coords = _.chunk(selection, 2).map((coord: ol.Coordinate) =>
-            ol.proj.transform(coord, PUGW92, WEB_MERCATOR)
-        );
-        this.setState({
-            selection: _.flatten(coords) as ol.Extent
-        })
-        const geometry = ol.interaction.Draw.createBox()(coords,undefined);
+        this.setState({ selection });
+        const geometry = getUTMAreaBox({ area: selection, getAspectRatioOrientation: () => this.state.orientation })
         const feature = new ol.Feature({ geometry });
         this.selectionLayer.addFeature(feature);
     }
 
-    private getSelection(): ol.Coordinate[] {
-        return _.chunk(this.state.selection, 2).map((coord: ol.Coordinate) =>
-            ol.proj.transform(coord, WEB_MERCATOR, PUGW92)
-        );
-    }
-
     private getScale(pageType: PageHeight): number {
-        const { orientation, margin } = this.state;
-        const selection = this.getSelection();
-        if (orientation === Orientation.NONE || _.isEmpty(selection)) {
+        const { orientation, margin, selection } = this.state;
+        if (orientation === Orientation.NONE || selection === undefined) {
             return;
         }
         return getScale({
@@ -132,8 +134,7 @@ export class MapView extends React.Component<MapProps, MapState> {
         });
     }
     private setScale(scale: number, pageType: PageHeight): void {
-        const { orientation, margin } = this.state;
-        const selection = this.getSelection();
+        const { orientation, margin, selection } = this.state;
         this.setSelection(getSelectionForScale({
             scale,
             selection,
@@ -143,12 +144,11 @@ export class MapView extends React.Component<MapProps, MapState> {
         }));
     }
 
-    private getFetchParams(): (string | number)[] {
-        return [
+    private getFetchParams(): string {
+        return mapAreaToUrlParams(this.state.selection) + ':' + [
             this.state.source,
             this.state.z,
-            'map',
-        ].concat(...this.getSelection());
+        ].join('-');
     }
 
     render() {
@@ -166,7 +166,7 @@ export class MapView extends React.Component<MapProps, MapState> {
                 />}
                 {this.state.selection && <a className="button"
                     target="printable"
-                    href={`fetch.html?${this.getFetchParams().join('|')}`}>
+                    href={`fetch.html?${this.getFetchParams()}`}>
                     Mapa
                 </a>}
                 <a className="button"
