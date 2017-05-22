@@ -13,7 +13,7 @@
   "devDependencies": {
     "@types/jest": "^19.2.2",
     "@types/lodash": "^4.14.63",
-    "@types/openlayers": "^4.0.1",
+    "@types/openlayers": "^4.1.0",
     "@types/proj4": "^2.3.4",
     "@types/react": "^15.0.21",
     "@types/react-dom": "^0.14.23",

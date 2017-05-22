@@ -10,9 +10,9 @@
   version "4.14.63"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.63.tgz#5ac475f55bfdc62bc88c4239dbc482f2f3bead93"
 
-"@types/openlayers@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@types/openlayers/-/openlayers-4.0.1.tgz#8c01b7a505f5b047e47d87f187a3f310ead61a45"
+"@types/openlayers@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@types/openlayers/-/openlayers-4.1.0.tgz#47e7bec2cd9d48238615f3916ff0b2e0a0628d43"
 
 "@types/proj4@^2.3.4":
   version "2.3.4"

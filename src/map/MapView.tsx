@@ -107,7 +107,7 @@ export class MapView extends React.Component<MapProps, MapState> {
         this.setState({
             selection: _.flatten(coords) as ol.Extent
         })
-        const geometry = (ol.interaction.Draw as any).createBox()(coords);
+        const geometry = ol.interaction.Draw.createBox()(coords,undefined);
         const feature = new ol.Feature({ geometry });
         this.selectionLayer.addFeature(feature);
     }
