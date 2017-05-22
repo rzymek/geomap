@@ -15,7 +15,7 @@ import { PUGW92, WEB_MERCATOR, WGS84, ll2mgrs } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
 import { enumMap } from "../logic/enumValues";
 import { Select } from "../components/Select";
-import {PageHeight,getScale,getSelectionForScale} from "./mapScale";
+import { PageHeight, getScale, getSelectionForScale } from "./mapScale";
 
 ol.proj.setProj4(setupProjections());
 
@@ -25,6 +25,7 @@ interface MapState {
     selection: ol.Extent,
     orientation: Orientation,
     source: string,
+    margin: number,
     z: number
 }
 export class MapView extends React.Component<MapProps, MapState> {
@@ -45,11 +46,12 @@ export class MapView extends React.Component<MapProps, MapState> {
             selection: undefined,
             orientation: Orientation.LANDSCAPE,
             source: 'topo',
+            margin: 10,
             z: 9
         }
-        this.dragInteraction.on('moveend',event=>{
+        this.dragInteraction.on('moveend', event => {
             const extent = event.feature.getGeometry().getExtent();
-            this.setState({selection:extent});
+            this.setState({ selection: extent });
         });
     }
 
@@ -79,7 +81,7 @@ export class MapView extends React.Component<MapProps, MapState> {
         });
         const selectionParam = parseUrlParameters().map(Number);
         this.setSelection(selectionParam);
-        if(!_.isEmpty(selectionParam)){
+        if (!_.isEmpty(selectionParam)) {
             this.setAreaDragMode();
         }
     }
@@ -116,25 +118,27 @@ export class MapView extends React.Component<MapProps, MapState> {
     }
 
     private getScale(pageType: PageHeight): number {
-        const { orientation } = this.state;
+        const { orientation, margin } = this.state;
         const selection = this.getSelection();
         if (orientation === Orientation.NONE || _.isEmpty(selection)) {
             return;
         }
         return getScale({
             selection,
-            pageType, 
-            orientation
+            pageType,
+            orientation,
+            margin,
         });
     }
     private setScale(scale: number, pageType: PageHeight): void {
-        const { orientation } = this.state;
+        const { orientation, margin } = this.state;
         const selection = this.getSelection();
         this.setSelection(getSelectionForScale({
             scale,
             selection,
             pageType,
-            orientation
+            orientation,
+            margin,
         }));
     }
 
@@ -153,25 +157,18 @@ export class MapView extends React.Component<MapProps, MapState> {
                 <Select values={enumMap(Orientation)}
                     value={this.state.orientation.toString()}
                     onChange={(value) => this.setState({ orientation: Number(value) })} />
-                {this.state.orientation !== Orientation.NONE &&
-                    Object.keys(PageHeight).filter(v => _.isNaN(Number(v))).map(pageType => [
-                        <br />,
-                        <label title="Margines: 1cm">
-                            {pageType}: 1:<input
-                                type="number"
-                                min={100}
-                                max={500000}
-                                step={100}
-                                value={_.defaultTo(this.getScale(PageHeight[pageType]) as any, '')}
-                                onChange={e => this.setScale(Number(e.target.value), PageHeight[pageType])} />
-                        </label>
-                    ])}
+                {this.state.orientation !== Orientation.NONE && <MapScaleSelector
+                    margin={this.state.margin}
+                    onMarginChange={margin => this.setState({ margin })}
+                    getScale={pageType => this.getScale(pageType)}
+                    onScaleChange={(scale, pageType) => this.setScale(scale, pageType)}
+                />}
                 {this.state.selection && <a className="button"
                     target="printable"
                     href={`fetch.html?${this.getFetchParams().join('|')}`}>
                     Mapa
                 </a>}
-                <a className="button"
+                < a className="button"
                     onClick={() => {
                         this.setState({ selection: undefined });
                         this.setSelection(undefined);
@@ -185,7 +182,7 @@ export class MapView extends React.Component<MapProps, MapState> {
                 bottom: 0,
                 zIndex: 0
             }} />
-        </div>
+        </div >
     }
 }
 
@@ -193,3 +190,32 @@ function formatToMGRS(pos: ol.Coordinate) {
     const mgrs = ll2mgrs(pos);
     return `${mgrs.zone} ${mgrs.grid} ${mgrs.x} ${mgrs.y}`;
 }
+
+const MapScaleSelector = (props: {
+    margin: number,
+    onMarginChange: (value: number) => void,
+    getScale: (pageType: PageHeight) => number
+    onScaleChange: (value: number, pageSize: PageHeight) => void,
+}) => <div>
+        <label>
+            Margines: <input type="number" min={0} max={100} step={1}
+                size={3} maxLength={3} style={{width:51}}
+                title="mm"
+                value={props.margin}
+                onChange={e => props.onMarginChange(Number(e.target.value))} />
+        </label>
+        {Object.keys(PageHeight).filter(v => _.isNaN(Number(v))).map(pageType => [
+            <br />,
+            <label>
+                {pageType}: 1:<input
+                    type="number"
+                    min={100}
+                    max={500000}
+                    step={100}
+                    value={_.defaultTo(props.getScale(PageHeight[pageType]) as any, '')}
+                    onChange={e => props.onScaleChange(Number(e.target.value), PageHeight[pageType])} />
+            </label>
+        ])}
+    </div>;
+
+    //_.defaultTo(this.getScale(PageHeight[pageType]) as any, '')
