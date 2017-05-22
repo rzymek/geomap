@@ -11,13 +11,11 @@ import { createControls, CoordsDisplayDefs } from "./controls";
 import { createLayers } from "./layers";
 import { createAreaSelector, Orientation } from "./areaSelector";
 import { parseUrlParameters } from "../logic/url-parameters";
-import { ll2mgrs } from "../logic/proj4defs";
+import { PUGW92, WEB_MERCATOR, WGS84, ll2mgrs } from "../logic/proj4defs";
 import { Drag } from "./dragFeatures";
 import { enumMap } from "../logic/enumValues";
 import { Select } from "../components/Select";
 
-const PUGW92 = "PUWG92";//'EPSG:2180";
-const WEB_MERCATOR = "EPSG:3857";
 ol.proj.setProj4(setupProjections());
 
 enum PageHeight {
@@ -61,14 +59,14 @@ export class MapView extends React.Component<MapProps, MapState> {
             controls: ol.control.defaults().extend([
                 new ol.control.MousePosition({
                     coordinateFormat: formatToMGRS,
-                    projection: 'EPSG:4326'
+                    projection: WGS84
                 }),
                 new ol.control.ScaleLine(),
                 new ol.control.ZoomSlider()
             ]),
             layers: createLayers(this.selectionLayer),
             view: new ol.View({
-                center: ol.proj.transform([21.03, 52.22], 'EPSG:4326', WEB_MERCATOR),
+                center: ol.proj.transform([21.03, 52.22], WGS84, WEB_MERCATOR),
                 zoom: 10
             }),
             interactions: ol.interaction.defaults().extend([
