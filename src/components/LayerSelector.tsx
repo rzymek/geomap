@@ -38,13 +38,13 @@ export class LayerSelector extends React.Component<Props, State>{
         });
     }
     render() {
-        return <div className="LayerSelector">
+        return <span className="LayerSelector">
             <Select values={_.mapValues(this.props.layers, v => v.label)}
                 value={this.state.source}
                 onChange={(layer) => this.handleChange({ source: layer })} />
             <Select values={LEVELS}
                 value={String(this.state.z)}
                 onChange={(level) => this.handleChange({ z: Number(level) })} />
-        </div>
+        </span>
     }
 }

@@ -7,6 +7,7 @@ import { Dimentions } from "../definitions/capabilities";
 import * as _ from "lodash";
 import { lineIntersecion } from "../logic/lineIntersection";
 import { getUTMGrid } from "../logic/utmGrid";
+import {NorthFixing} from "./NorthFixing";
 
 interface MapGridProps {
     step?: number,
@@ -14,7 +15,8 @@ interface MapGridProps {
     canvasSize: Dimentions,
     params: {
         fontSize: number,
-        gridLineWidth: number
+        gridLineWidth: number,
+        north: NorthFixing
     }
 }
 
@@ -91,7 +93,6 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
             this.utmToPx(utmGrid[0]),
             this.utmToPx({ x: utmGrid[1].x, y: utmGrid[0].y })
         );
-        // return '';
         return `rotate(${-angle})`;
     }
     private utmToPx(coord: CoordinatesXY): CoordinatesXY {
@@ -129,9 +130,9 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                 p2: this.utmToPx({ x: utmGrid[2].x + step, y }),
                 label: this.formatUTM(zone, utmGrid[0].x, y, 'y')
             }));
-
+        const rotateMap = this.props.params.north === NorthFixing.MGRS;
         return <g>
-            <g transform={this.getGridRotation(utmGrid)}>
+            <g transform={rotateMap ? this.getGridRotation(utmGrid) : undefined}>
                 {this.props.children}
                 <g id="grid-lines" >
                     {_.concat(

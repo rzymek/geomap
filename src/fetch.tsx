@@ -3,12 +3,15 @@ import * as ReactDOM from "react-dom";
 import * as ReactDOMServer from "react-dom/server";
 import * as _ from "lodash";
 import { LayerSelector } from "./components/LayerSelector";
+import { Select } from "./components/Select";
 import { LAYERS } from "./logic/layers";
 import { setupProjections, ll2pugw } from "./logic/proj4defs";
 import { SVGMap } from "./fetch/SVGMap";
 import { WebMercatorMapArea } from "./map/utmArea";
 import { parseUrlParameters, urlParamsToMapArea } from "./logic/url-parameters";
 import * as mgrs from "mgrs";
+import { NorthFixing } from "./fetch/NorthFixing"
+import { enumMap } from "./logic/enumValues"
 
 const DEFAULT_FONT_SIZE = 16;
 const DEFAULT_GRID_LINE_WIDTH = 1;
@@ -34,14 +37,15 @@ function mgrsBoundsToPuwgBox(area: string[]): Box {
 function getParameters(url?: string): MapParams {
     const [coords, mapParams] = _.defaultTo(url, location.search).split(/:/);
     const area = parseUrlParameters(coords);
-    const [source, z, fontSize, gridLineWidth] = mapParams.split(/-/);
+    const [source, z, fontSize, gridLineWidth, north] = mapParams.split(/-/);
     return {
         source,
         z: Number(z),
         title: coords,
         box: mgrsBoundsToPuwgBox(area),
         fontSize: _.defaultTo(Number(fontSize), DEFAULT_FONT_SIZE),
-        gridLineWidth: _.defaultTo(Number(gridLineWidth), DEFAULT_GRID_LINE_WIDTH)
+        gridLineWidth: _.defaultTo(Number(gridLineWidth), DEFAULT_GRID_LINE_WIDTH),
+        north: _.defaultTo(Number(north), NorthFixing.PUWG),
     }
 }
 export interface Box {
@@ -57,8 +61,10 @@ export interface MapParams {
     title?: string,
     box?: Box,
     fontSize: number,
-    gridLineWidth: number
+    gridLineWidth: number,
+    north: NorthFixing,
 }
+
 class Fetch extends React.Component<{}, MapParams> {
 
     constructor(props: {}) {
@@ -102,6 +108,11 @@ class Fetch extends React.Component<{}, MapParams> {
                     title="Grubość linii"
                     value={this.state.gridLineWidth}
                     onChange={e => this.setState({ gridLineWidth: _.toNumber((e as any).target.value) })} />
+                <label style={{marginLeft: 5}}>
+                    N wg.:<Select values={enumMap(NorthFixing)} 
+                        value={_.toString(this.state.north)} 
+                        onChange={north => this.setState({north: Number(north)})}/>
+                </label>
                 <button onClick={e => window.print()} title="Ctrl+P">Drukuj</button>
                 {/*<a href={this.dataURL(ReactDOMServer.renderToStaticMarkup(svg))} 
                 download={`${this.state.title}.svg`}>SVG</a>*/}
