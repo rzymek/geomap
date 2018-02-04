@@ -45,7 +45,7 @@ function getParameters(url?: string): MapParams {
         box: mgrsBoundsToPuwgBox(area),
         fontSize: _.defaultTo(Number(fontSize), DEFAULT_FONT_SIZE),
         gridLineWidth: _.defaultTo(Number(gridLineWidth), DEFAULT_GRID_LINE_WIDTH),
-        north: _.defaultTo(Number(north), NorthFixing.PUWG),
+        north: _.defaultTo(Number(north), NorthFixing.WGS84),
     }
 }
 export interface Box {

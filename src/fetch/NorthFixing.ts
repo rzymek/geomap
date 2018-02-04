@@ -1,4 +1,4 @@
 export enum NorthFixing {
-    PUWG,
+    WGS84,
     MGRS,
 }
