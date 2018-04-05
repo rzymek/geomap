@@ -169,9 +169,12 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                 label: this.formatUTM(zone, utmGrid[0].x, y, 'y')
             }));
         const rotateMap = this.props.params.north === NorthFixing.MGRS;
+        const showGrid = this.props.params.gridLineWidth > 0;
+        const showLabels = this.props.params.fontSize > 0;
         return <g>
             <g transform={rotateMap ? this.getGridRotation(utmGrid) : this.getGridMercatorRotation(utmGrid)}>
                 {this.props.children}
+                { showGrid && 
                 <g id="grid-lines">
                     {_.concat(
                         verticalLines,
@@ -182,7 +185,9 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                                   line={line}/>
                     )}
                 </g>
+                }
             </g>
+            { showLabels && 
             <g id="grid-labels">
                 {_.concat(
                     this.getLeftLabels(horizontalLines),
@@ -195,6 +200,7 @@ export class MapGrid extends React.Component<MapGridProps, {}> {
                            rotate={value.rotation}
                     />)}
             </g>
+            }
         </g>
     }
 }
